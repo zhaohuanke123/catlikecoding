@@ -1,22 +1,28 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Graph : MonoBehaviour
 {
-    [SerializeField] Transform pointPrefab;
-    [SerializeField, Range(10, 1000)] private int resolution = 10;
+    [FormerlySerializedAs("pointPrefab")] [SerializeField]
+    Transform m_pointPrefab;
 
-    [SerializeField] FunctionLibrary.FunctionName function;
-    private Transform[] points;
+    [FormerlySerializedAs("resolution")] [SerializeField, Range(10, 1000)]
+    private int m_resolution = 10;
+
+    [FormerlySerializedAs("function")] [SerializeField]
+    FunctionLibrary.FunctionName m_function;
+
+    private Transform[] m_points;
 
     private void Awake()
     {
-        points = new Transform[resolution * resolution];
-        float step = 2f / resolution;
+        m_points = new Transform[m_resolution * m_resolution];
+        float step = 2f / m_resolution;
         // var position = Vector3.zero;
         var scale = Vector3.one * step;
         // for (int i = 0, x = 0, z = 0; i < points.Length; i++, x++)
-        for (int i = 0; i < points.Length; i++)
+        for (int i = 0; i < m_points.Length; i++)
         {
             // if (x == resolution)
             // {
@@ -24,8 +30,8 @@ public class Graph : MonoBehaviour
             //     z += 1;
             // }
 
-            Transform point = Instantiate(pointPrefab, transform, false);
-            points[i] = point;
+            Transform point = Instantiate(m_pointPrefab, transform, false);
+            m_points[i] = point;
             // position.x = (x + 0.5f) * step - 1f;
             // position.z = (z + 0.5f) * step - 1f;
             // point.localPosition = position;
@@ -35,7 +41,7 @@ public class Graph : MonoBehaviour
 
     private void Update()
     {
-        FunctionLibrary.Function f = FunctionLibrary.GetFunction(function);
+        FunctionLibrary.Function f = FunctionLibrary.GetFunction(m_function);
         var time = Time.time;
         // for (int i = 0; i < points.Length; i++)
         // {
@@ -47,11 +53,11 @@ public class Graph : MonoBehaviour
         //     point.localPosition = position;
         // }
 
-        float step = 2f / resolution;
+        float step = 2f / m_resolution;
         float v = 0.5f * step - 1f;
-        for (int i = 0, x = 0, z = 0; i < points.Length; i++, x++)
+        for (int i = 0, x = 0, z = 0; i < m_points.Length; i++, x++)
         {
-            if (x == resolution)
+            if (x == m_resolution)
             {
                 x = 0;
                 z += 1;
@@ -60,7 +66,7 @@ public class Graph : MonoBehaviour
 
             float u = (x + 0.5f) * step - 1f;
             // float v = (z + 0.5f) * step - 1f;
-            points[i].localPosition = f(u, v, time);
+            m_points[i].localPosition = f(u, v, time);
         }
     }
 }

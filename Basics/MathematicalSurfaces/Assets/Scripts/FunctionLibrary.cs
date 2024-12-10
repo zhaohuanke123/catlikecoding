@@ -5,7 +5,7 @@ public static class FunctionLibrary
 {
     public delegate Vector3 Function(float u, float v, float t);
 
-    static Function[] functions = { Wave, MultiWave, Ripple, Sphere };
+    static Function[] m_functions = { Wave, MultiWave, Ripple, Sphere };
 
 
     public enum FunctionName
@@ -82,6 +82,6 @@ public static class FunctionLibrary
 
     public static Function GetFunction(FunctionName name)
     {
-        return functions[(int)name];
+        return m_functions[(int)name];
     }
 }
