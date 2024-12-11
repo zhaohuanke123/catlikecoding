@@ -1,53 +1,47 @@
-using System;
 using UnityEngine;
 
 public class Graph : MonoBehaviour
 {
-    [SerializeField] Transform pointPrefab;
-    [SerializeField, Range(10, 1000)] private int resolution = 10;
-    private Transform[] points;
+    /// <summary>
+    ///  函数点预制体
+    /// </summary>
+    [SerializeField] Transform m_pointPrefab;
+
+    /// <summary>
+    /// 函数分辨率
+    /// </summary>
+    [SerializeField, Range(10, 1000)] private int m_resolution = 10;
+
+    /// <summary>
+    ///  函数索引
+    /// </summary>
+    [HideInInspector] public int m_functionIndex;
+
+    /// <summary>
+    ///  函数点数组
+    /// </summary>
+    private Transform[] m_points;
 
     private void Awake()
     {
-        // for (int i = 0; i < 10; i++)
-        // {
-        //     Transform point = Instantiate(pointPrefab);
-        //     point.localPosition = Vector3.right * i / 5;
-        //     point.localPosition = Vector3.right * i;
-        // }
-
-        // for (int i = 0; i < 10; i++)
-        // {
-        //     Transform point = Instantiate(pointPrefab);
-        //     point.localPosition = Vector3.right * i;
-        //     // point.localScale = Vector3.one / 5f;
-        //     // point.localPosition = Vector3.right * (i / 5f - 1f);
-        //     point.localPosition = Vector3.right * ((i + 0.5f) / 5f - 1f);
-        // }
-
-        // Vector3 position = new Vector3();
-        // var scale = Vector3.one / 5f;
-        // for (int i = 0; i < resolution; i++)
-        // {
-        //     Transform point = Instantiate(pointPrefab);
-        //     // point.localPosition = Vector3.right * ((i + 0.5f) / 5f - 1f);
-        //     // point.localScale = scale;
-        //     position.x = (i + 0.5f) / 5f - 1f;
-        //     position.y = position.x * position.x;
-        //     point.localPosition = position;
-        //     point.localScale = scale;
-        // }
-        points = new Transform[resolution];
-        float step = 2f / resolution;
-        var position = Vector3.zero;
+        m_points = new Transform[m_resolution * m_resolution];
+        float step = 2f / m_resolution;
+        // var position = Vector3.zero;
         var scale = Vector3.one * step;
-        for (int i = 0; i < points.Length; i++)
+        // for (int i = 0, x = 0, z = 0; i < points.Length; i++, x++)
+        for (int i = 0; i < m_points.Length; i++)
         {
-            Transform point = Instantiate(pointPrefab, transform, false);
-            points[i] = point;
-            position.x = (i + 0.5f) * step - 1f;
-            // position.y = position.x * position.x * position.x;
-            point.localPosition = position;
+            // if (x == resolution)
+            // {
+            //     x = 0;
+            //     z += 1;
+            // }
+
+            Transform point = Instantiate(m_pointPrefab, transform, false);
+            m_points[i] = point;
+            // position.x = (x + 0.5f) * step - 1f;
+            // position.z = (z + 0.5f) * step - 1f;
+            // point.localPosition = position;
             point.localScale = scale;
         }
     }
@@ -55,12 +49,30 @@ public class Graph : MonoBehaviour
     private void Update()
     {
         var time = Time.time;
-        for (int i = 0; i < points.Length; i++)
+        // for (int i = 0; i < points.Length; i++)
+        // {
+        //     Transform point = points[i];
+        //     Vector3 position = point.localPosition;
+        //
+        //     position.y = f(position.x, position.z, time);
+        //
+        //     point.localPosition = position;
+        // }
+
+        float step = 2f / m_resolution;
+        float v = 0.5f * step - 1f;
+        for (int i = 0, x = 0, z = 0; i < m_points.Length; i++, x++)
         {
-            Transform point = points[i];
-            Vector3 position = point.localPosition;
-            position.y = Mathf.Sin(Mathf.PI * (position.x + time));
-            point.localPosition = position;
+            if (x == m_resolution)
+            {
+                x = 0;
+                z += 1;
+                v = (z + 0.5f) * step - 1f;
+            }
+
+            float u = (x + 0.5f) * step - 1f;
+            // float v = (z + 0.5f) * step - 1f;
+            m_points[i].localPosition = FunctionLibrary.GetFunctionValue(m_functionIndex, u, v, time);
         }
     }
 }

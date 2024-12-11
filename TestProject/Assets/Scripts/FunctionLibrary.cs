@@ -9,9 +9,6 @@ using static UnityEngine.Mathf;
 /// </summary>
 public static class FunctionLibrary
 {
-    /// <summary>
-    ///  图形函数特性, 标志表示该方法是图形函数 
-    /// </summary>
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
     private sealed class FunLibAttribute : Attribute
     {
@@ -23,13 +20,13 @@ public static class FunctionLibrary
     private delegate Vector3 Function(float u, float v, float t);
 
     /// <summary>
-    ///  函数列表, 通过反射填充
+    ///  图形函数列表
     /// </summary>
     // static List<Function> m_functions;
     private static List<Function> m_functions;
 
     /// <summary>
-    ///  函数名称列表, 通过反射填充名字，给编辑器使用
+    ///  图形函数名称列表
     /// </summary>
     private static string[] m_functionNames;
 
@@ -52,6 +49,30 @@ public static class FunctionLibrary
 
         m_functionNames = methodNames.ToArray();
     }
+
+    // public static float Wave(float x, float z, float t)
+    // {
+    //     return Sin(PI * (x + z + t));
+    // }
+    //
+    // public static float MultiWave(float x, float z, float t)
+    // {
+    //     float y = Sin(PI * (x + 0.5f * t));
+    //     y += 0.5f * Sin(2f * PI * (z + t));
+    //     // return y * (2f / 3f);
+    //     y += Sin(PI * (x + z + 0.25f * t));
+    //     return y * (1f / 2.5f);
+    // }
+    //
+    // public static float Ripple(float x, float z, float t)
+    // {
+    //     // float d = Abs(x);
+    //     // float y = Sin(4f * PI * d - t);
+    //     // return y / (1f + 10f * d);
+    //     float d = Sqrt(x * x + z * z);
+    //     float y = Sin(PI * (4f * d - t));
+    //     return y / (1f + 10f * d);
+    // }
 
     /// <summary>
     ///  对角波
@@ -219,7 +240,7 @@ public static class FunctionLibrary
     {
         float r = 1f;
         float s = 0.5f + r * Cos(0.5f * PI * v);
-        Vector3 p = Vector3.zero;
+        Vector3 p;
         p.x = s * Sin(PI * u);
         p.y = r * Sin(0.5f * PI * v);
         p.z = s * Cos(PI * u);

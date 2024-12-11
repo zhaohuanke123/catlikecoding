@@ -3,8 +3,19 @@ using UnityEngine;
 
 public class Graph : MonoBehaviour
 {
+    /// <summary>
+    /// 函数采样点的预制体
+    /// </summary>
     [SerializeField] Transform pointPrefab;
+
+    /// <summary>
+    ///  函数采样点的数量
+    /// </summary>
     [SerializeField, Range(10, 1000)] private int resolution = 10;
+
+    /// <summary>
+    ///  采样点数组
+    /// </summary>
     private Transform[] points;
 
     private void Awake()

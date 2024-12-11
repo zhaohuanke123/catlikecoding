@@ -5,7 +5,14 @@ using UnityEngine;
 
 public class ClockTicksGenerator : EditorWindow
 {
+    /// <summary>
+    /// 用于生成刻度的预制体
+    /// </summary>
     private GameObject m_tickPrefab;
+
+    /// <summary>
+    /// 钟表面GO，用于定位和确定半径
+    /// </summary>
     private GameObject m_clockSurface;
 
     /// <summary>
@@ -47,20 +54,23 @@ public class ClockTicksGenerator : EditorWindow
         }
     }
 
+    /// <summary>
+    ///   自动生成时钟刻度
+    /// </summary>
     private void GenerateTicks()
     {
         Vector3 clockCenter = m_clockSurface.transform.position;
-        float clockRadius = m_clockSurface.transform.localScale.x / 2 - m_offset; // 假设x-scale定义了半径
+        float clockRadius = m_clockSurface.transform.localScale.x / 2 - m_offset;
         // float tickOffset = 0.25f; // z-offset for tick positioning
 
         for (int i = 0; i < 12; i++)
         {
-            float angle = i * 30f * Mathf.Deg2Rad; // 角度转弧度
+            float angle = i * 30f * Mathf.Deg2Rad; 
             float x = clockCenter.x + clockRadius * Mathf.Sin(angle);
             float y = clockCenter.y + clockRadius * Mathf.Cos(angle);
             float z = -0.25f; // 顺时针方向
 
-            Vector3 tickPosition = new Vector3(x, y, z); // y调整为表面下方
+            Vector3 tickPosition = new Vector3(x, y, z); 
 
             GameObject tick =
                 (GameObject)PrefabUtility.InstantiatePrefab(m_tickPrefab, m_clockSurface.transform.parent);
