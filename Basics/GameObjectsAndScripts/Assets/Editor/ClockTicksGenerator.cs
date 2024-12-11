@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEditor;
 using UnityEngine;
@@ -6,6 +7,16 @@ public class ClockTicksGenerator : EditorWindow
 {
     private GameObject m_tickPrefab;
     private GameObject m_clockSurface;
+
+    /// <summary>
+    /// 偏移位置
+    /// </summary>
+    private int m_offset = 1;
+
+    /// <summary>
+    /// 是否启动旋转
+    /// </summary>
+    private bool m_enableRotation = false;
 
     [MenuItem("Tools/生成时钟刻度")]
     public static void ShowWindow()
@@ -20,6 +31,8 @@ public class ClockTicksGenerator : EditorWindow
         m_tickPrefab = (GameObject)EditorGUILayout.ObjectField("Tick Prefab", m_tickPrefab, typeof(GameObject), false);
         m_clockSurface =
             (GameObject)EditorGUILayout.ObjectField("Clock Surface", m_clockSurface, typeof(GameObject), true);
+        m_offset = EditorGUILayout.IntField("Offset", m_offset);
+        m_enableRotation = EditorGUILayout.Toggle("Enable Rotation", m_enableRotation);
 
         if (GUILayout.Button("Generate Ticks"))
         {
@@ -37,7 +50,7 @@ public class ClockTicksGenerator : EditorWindow
     private void GenerateTicks()
     {
         Vector3 clockCenter = m_clockSurface.transform.position;
-        float clockRadius = m_clockSurface.transform.localScale.x / 2 - 1; // 假设x-scale定义了半径
+        float clockRadius = m_clockSurface.transform.localScale.x / 2 - m_offset; // 假设x-scale定义了半径
         // float tickOffset = 0.25f; // z-offset for tick positioning
 
         for (int i = 0; i < 12; i++)
@@ -56,8 +69,17 @@ public class ClockTicksGenerator : EditorWindow
 
             Undo.RegisterCreatedObjectUndo(tick, "Create Clock Tick");
 
-            // ，考虑旋转, 0 1 2 3 点钟方向
-            tick.transform.Rotate(Vector3.forward, -i * 30f);
+            if (tick.transform.TryGetComponent<TextMeshPro>(out var text))
+            {
+                text.text = (i == 0 ? 12 : i).ToString();
+                tick.name = "TimeNumber" + text.text;
+            }
+
+            if (m_enableRotation)
+            {
+                // ，考虑旋转, 0 1 2 3 点钟方向
+                tick.transform.Rotate(Vector3.forward, -i * 30f);
+            }
         }
 
         Debug.Log("Clock ticks generated successfully!");

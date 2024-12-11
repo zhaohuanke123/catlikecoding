@@ -4,14 +4,11 @@ using UnityEngine.Serialization;
 
 public class Graph : MonoBehaviour
 {
-    [FormerlySerializedAs("pointPrefab")] [SerializeField]
-    Transform m_pointPrefab;
+    [SerializeField] Transform m_pointPrefab;
 
-    [FormerlySerializedAs("resolution")] [SerializeField, Range(10, 1000)]
-    private int m_resolution = 10;
+    [SerializeField, Range(10, 1000)] private int m_resolution = 10;
 
-    [FormerlySerializedAs("function")] [SerializeField]
-    FunctionLibrary.FunctionName m_function;
+    [SerializeField] FunctionLibrary.FunctionName m_function;
 
     private Transform[] m_points;
 
