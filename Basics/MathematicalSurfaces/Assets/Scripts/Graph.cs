@@ -1,15 +1,25 @@
-using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class Graph : MonoBehaviour
 {
+    /// <summary>
+    ///  函数点预制体
+    /// </summary>
     [SerializeField] Transform m_pointPrefab;
 
+    /// <summary>
+    /// 函数分辨率
+    /// </summary>
     [SerializeField, Range(10, 1000)] private int m_resolution = 10;
 
-    [SerializeField] FunctionLibrary.FunctionName m_function;
+    /// <summary>
+    ///  函数索引
+    /// </summary>
+    [HideInInspector] public int m_functionIndex;
 
+    /// <summary>
+    ///  函数点数组
+    /// </summary>
     private Transform[] m_points;
 
     private void Awake()
@@ -38,7 +48,6 @@ public class Graph : MonoBehaviour
 
     private void Update()
     {
-        FunctionLibrary.Function f = FunctionLibrary.GetFunction(m_function);
         var time = Time.time;
         // for (int i = 0; i < points.Length; i++)
         // {
@@ -63,7 +72,7 @@ public class Graph : MonoBehaviour
 
             float u = (x + 0.5f) * step - 1f;
             // float v = (z + 0.5f) * step - 1f;
-            m_points[i].localPosition = f(u, v, time);
+            m_points[i].localPosition = FunctionLibrary.GetFunctionValue(m_functionIndex, u, v, time);
         }
     }
 }
