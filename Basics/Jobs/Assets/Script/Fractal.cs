@@ -9,14 +9,17 @@ using quaternion = Unity.Mathematics.quaternion;
 
 public struct FractalPart
 {
-    public Vector3 direction;
-    public Vector3 worldPosition;
-    public Quaternion rotation;
-    public Quaternion worldRotation;
+    public float3 direction;
+    public float3 worldPosition;
+    public quaternion rotation;
+    public quaternion worldRotation;
     public float spinAngle;
 }
 
-[BurstCompile(CompileSynchronously = true)]
+//  FloatMode.Fast允许  Burst 重新排序数学运算，例如将 a + b * c 重写为 b * c + a 。这可以提高性能，因为存在
+//  madd（乘加）指令，它比单独的加法指令后再进行乘法运算更快。着色器编译器默认情况下会执行此操作。通常重新排序运算不会产生逻辑差异，但是由于浮点数的限制，更改顺序会产生略微不同的结果。
+// CompileSynchronously强制编辑器在需要时立即编译作业的 Burst 版本
+[BurstCompile(FloatPrecision.Standard, FloatMode.Fast, CompileSynchronously = true)]
 struct UpdateFractalLevelJob : IJobFor
 {
     public float spinAngleDelta;
@@ -28,23 +31,23 @@ struct UpdateFractalLevelJob : IJobFor
     public NativeArray<FractalPart> parts;
 
     [WriteOnly]
-    public NativeArray<Matrix4x4> matrices;
+    public NativeArray<float4x4> matrices;
 
     public void Execute(int i)
     {
         FractalPart parent = parents[i / 5];
         FractalPart part = parts[i];
         part.spinAngle += spinAngleDelta;
-        part.worldRotation =
-            parent.worldRotation *
-            (part.rotation * Quaternion.Euler(0f, part.spinAngle, 0f));
+        part.worldRotation = mul(parent.worldRotation,
+            mul(part.rotation, quaternion.RotateY(part.spinAngle))
+        );
         part.worldPosition =
             parent.worldPosition +
-            parent.worldRotation * (1.5f * scale * part.direction);
+            mul(parent.worldRotation, 1.5f * scale * part.direction);
         parts[i] = part;
 
-        matrices[i] = Matrix4x4.TRS(
-            part.worldPosition, part.worldRotation, scale * Vector3.one
+        matrices[i] = float4x4.TRS(
+            part.worldPosition, part.worldRotation, float3(scale)
         );
     }
 }
@@ -56,14 +59,14 @@ public class Fractal : MonoBehaviour
     private void OnEnable()
     {
         parts = new NativeArray<FractalPart>[depth];
-        matrices = new NativeArray<Matrix4x4>[depth];
+        matrices = new NativeArray<float4x4>[depth];
 
         matricesBuffers = new ComputeBuffer[depth];
         int stride = 16 * 4;
         for (int i = 0, length = 1; i < parts.Length; i++, length *= 5)
         {
             parts[i] = new NativeArray<FractalPart>(length, Allocator.Persistent);
-            matrices[i] = new NativeArray<Matrix4x4>(length, Allocator.Persistent);
+            matrices[i] = new NativeArray<float4x4>(length, Allocator.Persistent);
             matricesBuffers[i] = new ComputeBuffer(length, stride);
         }
 
@@ -108,17 +111,17 @@ public class Fractal : MonoBehaviour
 
     private void Update()
     {
-        float spinAngleDelta = 22.5f * Time.deltaTime;
+        float spinAngleDelta = 0.125f * PI * Time.deltaTime;
         FractalPart rootPart = parts[0][0];
         rootPart.spinAngle += spinAngleDelta;
-        rootPart.worldRotation =
-            transform.rotation *
-            (rootPart.rotation * Quaternion.Euler(0f, rootPart.spinAngle, 0f));
+        rootPart.worldRotation = mul(transform.rotation,
+            mul(rootPart.rotation, quaternion.RotateY(rootPart.spinAngle))
+        );
         rootPart.worldPosition = transform.position;
         parts[0][0] = rootPart;
         float objectScale = transform.lossyScale.x;
-        matrices[0][0] = Matrix4x4.TRS(
-            rootPart.worldPosition, rootPart.worldRotation, objectScale * Vector3.one
+        matrices[0][0] = float4x4.TRS(
+            rootPart.worldPosition, rootPart.worldRotation, float3(objectScale)
         );
 
         float scale = objectScale;
@@ -189,18 +192,18 @@ public class Fractal : MonoBehaviour
     private Material material;
 
     private NativeArray<FractalPart>[] parts;
-    private NativeArray<Matrix4x4>[] matrices;
+    private NativeArray<float4x4>[] matrices;
 
-    private static Vector3[] directions =
+    static float3[] directions =
     {
-        Vector3.up, Vector3.right, Vector3.left, Vector3.forward, Vector3.back
+        up(), right(), left(), forward(), back()
     };
 
-    private static Quaternion[] rotations =
+    static quaternion[] rotations =
     {
-        Quaternion.identity,
-        Quaternion.Euler(0f, 0f, -90f), Quaternion.Euler(0f, 0f, 90f),
-        Quaternion.Euler(90f, 0f, 0f), Quaternion.Euler(-90f, 0f, 0f)
+        quaternion.identity,
+        quaternion.RotateZ(-0.5f * PI), quaternion.RotateZ(0.5f * PI),
+        quaternion.RotateX(0.5f * PI), quaternion.RotateX(-0.5f * PI)
     };
 
     private static MaterialPropertyBlock propertyBlock;
