@@ -1,25 +1,23 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
+
+
+/// <summary>
+///  切换图像函数索引的模式
+/// </summary>
+public enum TransitionMode
+{
+    Cycle,
+    Random
+}
 
 public class GPUGraph : MonoBehaviour
 {
-    #region 方法
+    #region Unity生命周期
 
     private void Awake()
     {
-        m_points = new Transform[m_resolution * m_resolution];
-
-        // 1. 根据分辨率创建函数点，计算步长和缩放 
-        float step = 2f / m_resolution;
-        var scale = Vector3.one * step;
-
-        // 2. 创建函数点
-        for (int i = 0; i < m_points.Length; i++)
-        {
-            Transform point = Instantiate(m_pointPrefab, transform, false);
-            m_points[i] = point;
-
-            point.localScale = scale;
-        }
+        m_positionsBuffer = new ComputeBuffer(MaxResolution * MaxResolution, 3 * 4);
     }
 
     private void Update()
@@ -46,16 +44,18 @@ public class GPUGraph : MonoBehaviour
             PickNextFunction();
         }
 
-        // 5. 判断是否在过渡
-        if (m_transitioning)
-        {
-            UpdateFunctionTransition();
-        }
-        else
-        {
-            UpdateFunction();
-        }
+        UpdateFunctionOnGPU();
     }
+
+    private void OnDisable()
+    {
+        m_positionsBuffer.Release();
+        m_positionsBuffer = null;
+    }
+
+    #endregion
+
+    #region 方法
 
     /// <summary>
     ///  选择下一个函数
@@ -67,63 +67,48 @@ public class GPUGraph : MonoBehaviour
             : FunctionLibrary.GetRandomFunctionIndex(m_functionIndex);
     }
 
-    /// <summary>
-    /// 驱动函数图核心逻辑,用于显示单个函数
-    /// </summary>
-    private void UpdateFunction()
+    void UpdateFunctionOnGPU()
     {
-        // 1. 获取当前时间
-        var time = Time.time;
-
-        // 2. 计算函数点的位置
+        // 1. 设置参数
+        // 计算每个采样点的步长，步长为 2 / 分辨率
         float step = 2f / m_resolution;
-        float v = 0.5f * step - 1f;
 
-        for (int i = 0, x = 0, z = 0; i < m_points.Length; i++, x++)
+        m_computeShader.SetInt(ResolutionId, m_resolution);
+        m_computeShader.SetFloat(StepId, step);
+        m_computeShader.SetFloat(TimeId, Time.time);
+
+        // 2. 设置过渡动画进度（如果有过渡）
+        if (m_transitioning)
         {
-            // 3. 如果x等于分辨率，则重新计算v
-            if (x == m_resolution)
-            {
-                x = 0;
-                z += 1;
-                v = (z + 0.5f) * step - 1f;
-            }
-
-            float u = (x + 0.5f) * step - 1f;
-            // 4. 计算函数点的位置
-            m_points[i].localPosition = FunctionLibrary.GetFunctionValue(m_functionIndex, u, v, time);
+            // 使用平滑步进函数计算过渡进度
+            m_computeShader.SetFloat(
+                TransitionProgressId,
+                Mathf.SmoothStep(0f, 1f, m_duration / m_transitionDuration)
+            );
         }
-    }
 
+        // 3. 设置 positionsBuffer 到 Compute Shader 的输入缓存
+        m_computeShader.SetBuffer(0, PositionsId, m_positionsBuffer);
 
-    /// <summary>
-    ///  驱动函数图核心逻辑,用于显示函数过渡
-    /// </summary>
-    private void UpdateFunctionTransition()
-    {
-        // 1. 获取当前时间
-        float time = Time.time;
+        // 4. 选择当前函数和过渡函数（如果有过渡）
+        int function = m_functionIndex % FunctionLibrary.FunctionCount;
+        int transitionFunction = m_transitionFunctionIndex % FunctionLibrary.FunctionCount;
+        // 根据是否过渡，选择对应的函数
+        var kernelIndex =
+            function + (m_transitioning ? transitionFunction : function) * FunctionLibrary.FunctionCount;
+        m_computeShader.SetBuffer(kernelIndex, PositionsId, m_positionsBuffer);
 
-        // 2. 计算函数点的位置
-        float step = 2f / m_resolution;
-        float v = 0.5f * step - 1f;
-        float progress = m_duration / m_transitionDuration;
+        // 5. 计算并设置 Dispatch 的线程组数量
+        int groups = Mathf.CeilToInt(m_resolution / 8f);
+        m_computeShader.Dispatch(kernelIndex, groups, groups, 1);
 
-        for (int i = 0, x = 0, z = 0; i < m_points.Length; i++, x++)
-        {
-            // 3. 如果x等于分辨率，则重新计算v
-            if (x == m_resolution)
-            {
-                x = 0;
-                z += 1;
-                v = (z + 0.5f) * step - 1f;
-            }
+        // 6. 设置材质的参数
+        m_material.SetBuffer(PositionsId, m_positionsBuffer);
+        m_material.SetFloat(StepId, step);
 
-            float u = (x + 0.5f) * step - 1f;
-            // 4. 计算函数点的位置, 过渡函数
-            m_points[i].localPosition =
-                FunctionLibrary.Morph(u, v, time, m_transitionFunctionIndex, m_functionIndex, progress);
-        }
+        // 7. 绘制实例化网格（使用 GPU 计算结果）
+        var bounds = new Bounds(Vector3.zero, Vector3.one * (2f + 2f / m_resolution));
+        Graphics.DrawMeshInstancedProcedural(m_mesh, 0, m_material, bounds, m_resolution * m_resolution);
     }
 
     #endregion
@@ -136,18 +121,13 @@ public class GPUGraph : MonoBehaviour
     [HideInInspector]
     public int m_functionIndex;
 
-
-    /// <summary>
-    ///  函数点预制体
-    /// </summary>
-    [SerializeField]
-    private Transform m_pointPrefab;
+    const int MaxResolution = 1000;
 
     /// <summary>
     /// 函数分辨率
     /// </summary>
     [SerializeField]
-    [Range(10, 1000)]
+    [Range(10, MaxResolution)]
     private int m_resolution = 10;
 
     /// <summary>
@@ -170,10 +150,6 @@ public class GPUGraph : MonoBehaviour
     [Min(0f)]
     private float m_transitionDuration = 1f;
 
-    /// <summary>
-    ///  函数点数组
-    /// </summary>
-    private Transform[] m_points;
 
     /// <summary>
     /// 单个函数持续时间计时器
@@ -189,6 +165,27 @@ public class GPUGraph : MonoBehaviour
     ///  正在过渡的函数索引
     /// </summary>
     private int m_transitionFunctionIndex;
+
+    #endregion
+
+    #region ComputerShader 相关字段
+
+    private ComputeBuffer m_positionsBuffer;
+
+    [SerializeField]
+    private ComputeShader m_computeShader;
+
+    private static readonly int PositionsId = Shader.PropertyToID("_Positions");
+    private static readonly int ResolutionId = Shader.PropertyToID("_Resolution");
+    private static readonly int StepId = Shader.PropertyToID("_Step");
+    private static readonly int TimeId = Shader.PropertyToID("_Time");
+    private static readonly int TransitionProgressId = Shader.PropertyToID("_TransitionProgress");
+
+    [SerializeField]
+    private Material m_material;
+
+    [SerializeField]
+    private Mesh m_mesh;
 
     #endregion
 }
