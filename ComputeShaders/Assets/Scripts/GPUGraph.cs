@@ -121,7 +121,7 @@ public class GPUGraph : MonoBehaviour
     [HideInInspector]
     public int m_functionIndex;
 
-    const int MaxResolution = 1000;
+    private const int MaxResolution = 1000;
 
     /// <summary>
     /// 函数分辨率
