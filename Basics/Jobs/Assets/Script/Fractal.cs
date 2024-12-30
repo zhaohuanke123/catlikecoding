@@ -1,55 +1,85 @@
 ﻿using UnityEngine;
 
+public struct FractalPart
+{
+    public Vector3 direction;
+    public Quaternion rotation;
+    public Transform transform;
+}
 
 public class Fractal : MonoBehaviour
 {
     #region Unity 生命周期
 
-    private void Start()
+    private void Awake()
     {
-        name = "Fractal " + depth;
-        // 1. 检查深度是否为 1 或更少。停止递归
-        if (depth <= 1)
+        parts = new FractalPart[depth][];
+        for (int i = 0, length = 1; i < parts.Length; i++, length *= 5)
         {
-            return;
+            parts[i] = new FractalPart[length];
         }
 
-        Fractal childA = CreateChild(Vector3.up, Quaternion.identity);
-        Fractal childB = CreateChild(Vector3.right, Quaternion.Euler(0f, 0f, -90f));
-        Fractal childC = CreateChild(Vector3.left, Quaternion.Euler(0f, 0f, 90f));
-        Fractal childD = CreateChild(Vector3.forward, Quaternion.Euler(90f, 0f, 0f));
-        Fractal childE = CreateChild(Vector3.back, Quaternion.Euler(-90f, 0f, 0f));
-
-        childA.transform.SetParent(transform, false);
-        childB.transform.SetParent(transform, false);
-        childC.transform.SetParent(transform, false);
-        childD.transform.SetParent(transform, false);
-        childE.transform.SetParent(transform, false);
+        float scale = 1f;
+        parts[0][0] = CreatePart(0, 0, scale);
+        for (int li = 1; li < parts.Length; li++)
+        {
+            scale *= 0.5f;
+            var levelParts = parts[li];
+            for (int fpi = 0; fpi < levelParts.Length; fpi += 5)
+            {
+                for (int ci = 0; ci < 5; ci++)
+                {
+                    levelParts[fpi + ci] = CreatePart(li, ci, scale);
+                }
+            }
+        }
     }
 
     private void Update()
     {
-        transform.Rotate(0f, 22.5f * Time.deltaTime, 0f);
+        var deltaRotation = Quaternion.Euler(0f, 22.5f * Time.deltaTime, 0f);
+        var rootPart = parts[0][0];
+        rootPart.rotation *= deltaRotation;
+        rootPart.transform.localRotation = rootPart.rotation;
+        parts[0][0] = rootPart;
+
+        for (int li = 1; li < parts.Length; li++)
+        {
+            var parentParts = parts[li - 1];
+            var levelParts = parts[li];
+            for (int fpi = 0; fpi < levelParts.Length; fpi++)
+            {
+                var parentTransform = parentParts[fpi / 5].transform;
+                var part = levelParts[fpi];
+                part.rotation *= deltaRotation;
+                part.transform.localRotation =
+                    parentTransform.localRotation * part.rotation;
+                part.transform.localPosition =
+                    parentTransform.localPosition +
+                    parentTransform.localRotation *
+                    (1.5f * part.transform.localScale.x * part.direction);
+                levelParts[fpi] = part;
+            }
+        }
     }
 
     #endregion
 
     #region 方法
 
-    /// <summary>
-    ///  根据不同方向创建子物体
-    /// </summary>
-    /// <param name="direction">创建子物体的方向</param>
-    /// <param name="rotation">创建子物体的旋转</param>
-    /// <returns>  创建的子物体 </returns>
-    private Fractal CreateChild(Vector3 direction, Quaternion rotation)
+    FractalPart CreatePart(int levelIndex, int childIndex, float scale)
     {
-        Fractal child = Instantiate(this);
-        child.depth = depth - 1;
-        child.transform.localPosition = 0.75f * direction;
-        child.transform.localRotation = rotation;
-        child.transform.localScale = 0.5f * Vector3.one;
-        return child;
+        var go = new GameObject("Fractal Part L" + levelIndex + " C" + childIndex);
+        go.transform.localScale = scale * Vector3.one;
+        go.transform.SetParent(transform, false);
+        go.AddComponent<MeshFilter>().mesh = mesh;
+        go.AddComponent<MeshRenderer>().material = material;
+        return new FractalPart
+        {
+            direction = directions[childIndex],
+            rotation = rotations[childIndex],
+            transform = go.transform
+        };
     }
 
     #endregion
@@ -67,6 +97,26 @@ public class Fractal : MonoBehaviour
     [Range(1, 8)]
     [SerializeField]
     private int depth = 4;
+
+    [SerializeField]
+    private Mesh mesh;
+
+    [SerializeField]
+    private Material material;
+
+    private FractalPart[][] parts;
+
+    private static Vector3[] directions =
+    {
+        Vector3.up, Vector3.right, Vector3.left, Vector3.forward, Vector3.back
+    };
+
+    private static Quaternion[] rotations =
+    {
+        Quaternion.identity,
+        Quaternion.Euler(0f, 0f, -90f), Quaternion.Euler(0f, 0f, 90f),
+        Quaternion.Euler(90f, 0f, 0f), Quaternion.Euler(-90f, 0f, 0f)
+    };
 
     #endregion
 }
