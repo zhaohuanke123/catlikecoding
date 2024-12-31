@@ -11,6 +11,9 @@ public enum TransitionMode
     Random
 }
 
+/// <summary>
+/// 使用GPU生成图形生成类
+/// </summary>
 public class GPUGraph : MonoBehaviour
 {
     #region Unity生命周期
@@ -67,7 +70,7 @@ public class GPUGraph : MonoBehaviour
             : FunctionLibrary.GetRandomFunctionIndex(m_functionIndex);
     }
 
-    void UpdateFunctionOnGPU()
+    private void UpdateFunctionOnGPU()
     {
         // 1. 设置参数
         // 计算每个采样点的步长，步长为 2 / 分辨率
@@ -121,6 +124,9 @@ public class GPUGraph : MonoBehaviour
     [HideInInspector]
     public int m_functionIndex;
 
+    /// <summary>
+    ///  最大分辨率
+    /// </summary>
     private const int MaxResolution = 1000;
 
     /// <summary>
@@ -150,7 +156,6 @@ public class GPUGraph : MonoBehaviour
     [Min(0f)]
     private float m_transitionDuration = 1f;
 
-
     /// <summary>
     /// 单个函数持续时间计时器
     /// </summary>
@@ -170,20 +175,51 @@ public class GPUGraph : MonoBehaviour
 
     #region ComputerShader 相关字段
 
+    /// <summary>
+    ///  位置缓存
+    /// </summary>
     private ComputeBuffer m_positionsBuffer;
 
+    /// <summary>
+    ///  Compute Shader实例
+    /// </summary>
     [SerializeField]
     private ComputeShader m_computeShader;
 
+    /// <summary>
+    ///  材质参数-位置
+    /// </summary>
     private static readonly int PositionsId = Shader.PropertyToID("_Positions");
+
+    /// <summary>
+    ///   材质参数-分辨率
+    /// </summary>
     private static readonly int ResolutionId = Shader.PropertyToID("_Resolution");
+
+    /// <summary>
+    ///  材质参数-步长
+    /// </summary>
     private static readonly int StepId = Shader.PropertyToID("_Step");
+
+    /// <summary>
+    ///  材质参数-时间
+    /// </summary>
     private static readonly int TimeId = Shader.PropertyToID("_Time");
+
+    /// <summary>
+    ///  材质参数-过渡进度
+    /// </summary>
     private static readonly int TransitionProgressId = Shader.PropertyToID("_TransitionProgress");
 
+    /// <summary>
+    ///  GPU Instance 使用的 Material 
+    /// </summary>
     [SerializeField]
     private Material m_material;
 
+    /// <summary>
+    ///  GPU Instance 使用的 Mesh
+    /// </summary>
     [SerializeField]
     private Mesh m_mesh;
 

@@ -16,7 +16,7 @@ public enum DisplayMode
 /// </summary>
 public class FrameRateCounter : MonoBehaviour
 {
-    #region 方法
+    #region Unity 生命周期
 
     private void Update()
     {
@@ -62,6 +62,10 @@ public class FrameRateCounter : MonoBehaviour
             ResetData();
         }
     }
+
+    #endregion
+
+    #region 方法
 
     /// <summary>
     ///  重置数据

@@ -55,7 +55,7 @@ public static class FunctionLibrary
     /// <returns>函数索引</returns>
     public static int GetRandomFunctionIndex(int index)
     {
-        var choice = Random.Range(1, m_functionNames.Length);
+        int choice = Random.Range(1, s_functionNames.Length);
         return choice == index ? 0 : choice;
     }
 
@@ -66,7 +66,7 @@ public static class FunctionLibrary
     /// <returns></returns>
     public static int GetNextFunctionIndex(int index)
     {
-        if (index >= m_functionNames.Length - 1)
+        if (index >= s_functionNames.Length - 1)
         {
             return 0;
         }
@@ -79,7 +79,7 @@ public static class FunctionLibrary
     /// </summary>
     public static string[] GetFunctionNames()
     {
-        return m_functionNames;
+        return s_functionNames;
     }
 
     static FunctionLibrary()
@@ -89,7 +89,7 @@ public static class FunctionLibrary
         // 1. 获取所有的方法
         var methods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public);
         m_functions = new List<Function>();
-        List<string> methodNames = new List<string>();
+        var methodNames = new List<string>();
 
         // 2. 遍历方法，获取打有特性的方法
         foreach (var method in methods)
@@ -101,8 +101,29 @@ public static class FunctionLibrary
             }
         }
 
-        m_functionNames = methodNames.ToArray();
+        s_functionNames = methodNames.ToArray();
     }
+
+    /// <summary>
+    ///  获取函数值
+    /// </summary>
+    /// <returns> 函数值 </returns>
+    public static Vector3 GetFunctionValue(int funcIndex, float u, float v, float t)
+    {
+        return GetFunction(funcIndex)(u, v, t);
+    }
+
+    /// <summary>
+    ///  根据索引获取函数
+    /// </summary>
+    /// <param name="funcIndex"></param>
+    /// <returns>  函数委托 </returns>
+    private static Function GetFunction(int funcIndex)
+    {
+        return m_functions[funcIndex];
+    }
+
+    #endregion
 
     #region 各类函数图形
 
@@ -178,30 +199,9 @@ public static class FunctionLibrary
 
     #endregion
 
-    /// <summary>
-    ///  根据索引获取函数
-    /// </summary>
-    /// <param name="funcIndex"></param>
-    /// <returns>  函数委托 </returns>
-    private static Function GetFunction(int funcIndex)
-    {
-        return m_functions[funcIndex];
-    }
-
-    /// <summary>
-    ///  获取函数值
-    /// </summary>
-    /// <returns> 函数值 </returns>
-    public static Vector3 GetFunctionValue(int funcIndex, float u, float v, float t)
-    {
-        return GetFunction(funcIndex)(u, v, t);
-    }
-
-    #endregion
-
     #region 属性
 
-    public static int FunctionCount => m_functionNames.Length;
+    public static int FunctionCount => s_functionNames.Length;
 
     #endregion
 
@@ -216,7 +216,7 @@ public static class FunctionLibrary
     /// <summary>
     ///  函数名称列表, 通过反射填充名字，给编辑器使用
     /// </summary>
-    private static string[] m_functionNames;
+    private static string[] s_functionNames;
 
     #endregion
 }

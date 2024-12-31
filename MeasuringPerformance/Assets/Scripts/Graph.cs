@@ -28,7 +28,7 @@ public class Graph : MonoBehaviour
         // 2. 创建函数点
         for (int i = 0; i < m_points.Length; i++)
         {
-            Transform point = Instantiate(m_pointPrefab, transform, false);
+            var point = Instantiate(m_pointPrefab, transform, false);
             m_points[i] = point;
 
             point.localScale = scale;

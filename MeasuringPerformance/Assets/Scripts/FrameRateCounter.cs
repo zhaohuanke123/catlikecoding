@@ -16,7 +16,7 @@ public enum DisplayMode
 /// </summary>
 public class FrameRateCounter : MonoBehaviour
 {
-    #region 方法
+    #region Unity 生命周期
 
     private void Update()
     {
@@ -63,8 +63,12 @@ public class FrameRateCounter : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region 方法
+
     /// <summary>
-    ///  重置数据
+    ///  重置统计数据
     /// </summary>
     private void ResetData()
     {
@@ -94,7 +98,8 @@ public class FrameRateCounter : MonoBehaviour
     /// <summary>
     ///  采样时间，更新显示数据的时间
     /// </summary>
-    [SerializeField, Range(0.1f, 2f)]
+    [SerializeField]
+    [Range(0.1f, 2f)]
     private float m_sampleDuration = 1f;
 
     /// <summary>
