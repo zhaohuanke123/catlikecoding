@@ -534,6 +534,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSpeed: 7.6
   maxAcceleration: 21.5
+  allowedArea:
+    serializedVersion: 2
+    x: -4.5
+    y: -4.5
+    width: 9
+    height: 9
 --- !u!1 &1088836738
 GameObject:
   m_ObjectHideFlags: 0
