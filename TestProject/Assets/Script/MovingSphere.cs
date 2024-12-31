@@ -30,6 +30,7 @@ public class MovingSphere : MonoBehaviour
         if (m_propBlock == null)
         {
             m_propBlock = new MaterialPropertyBlock();
+            m_renderer.GetPropertyBlock(m_propBlock);
         }
 
         // 4. 根据接触点数量设置颜色
