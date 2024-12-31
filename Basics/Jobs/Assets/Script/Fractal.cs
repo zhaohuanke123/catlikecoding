@@ -4,52 +4,98 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using static Unity.Mathematics.math;
-using float4x4 = Unity.Mathematics.float4x4;
 using quaternion = Unity.Mathematics.quaternion;
 
 public struct FractalPart
 {
+    /// <summary>
+    /// 方向向量
+    /// </summary>
     public float3 direction;
+
+    /// <summary>
+    /// 世界坐标
+    /// </summary>
     public float3 worldPosition;
+
+    /// <summary>
+    /// 本地旋转
+    /// </summary>
     public quaternion rotation;
+
+    /// <summary>
+    /// 世界旋转）
+    /// </summary>
     public quaternion worldRotation;
+
+    /// <summary>
+    /// 旋转角度
+    /// </summary>
     public float spinAngle;
 }
 
 //  FloatMode.Fast允许  Burst 重新排序数学运算，例如将 a + b * c 重写为 b * c + a 。这可以提高性能，因为存在
 //  madd（乘加）指令，它比单独的加法指令后再进行乘法运算更快。着色器编译器默认情况下会执行此操作。通常重新排序运算不会产生逻辑差异，但是由于浮点数的限制，更改顺序会产生略微不同的结果。
 // CompileSynchronously强制编辑器在需要时立即编译作业的 Burst 版本
+/// <summary>
+/// 用于更新分形层级的工作任务，通过计算每个FractalPart的旋转、位置和变换矩阵来构建分形结构。
+/// 该任务在每一层分形中执行，利用父节点的旋转和位置信息计算当前节点的旋转和位置。
+/// </summary>
 [BurstCompile(FloatPrecision.Standard, FloatMode.Fast, CompileSynchronously = true)]
 struct UpdateFractalLevelJob : IJobFor
 {
-    public float spinAngleDelta;
-    public float scale;
-
-    [ReadOnly]
-    public NativeArray<FractalPart> parents;
-
-    public NativeArray<FractalPart> parts;
-
-    [WriteOnly]
-    public NativeArray<float4x4> matrices;
-
+    /// <summary>
+    /// 执行更新任务，计算FractalPart的旋转和位置，并更新相关数据。
+    /// </summary>
+    /// <param name="i">当前任务的索引。</param>
     public void Execute(int i)
     {
-        FractalPart parent = parents[i / 5];
-        FractalPart part = parts[i];
-        part.spinAngle += spinAngleDelta;
+        // 1. 获取当前FractalPart和当前FractalPart的父节点
+        var parent = m_parents[i / 5];
+        var part = m_parts[i];
+
+        // 2. 更新旋转角度
+        part.spinAngle += m_spinAngleDelta;
+        // 3. 计算当前FractalPart的世界旋转，世界位置
         part.worldRotation = mul(parent.worldRotation,
             mul(part.rotation, quaternion.RotateY(part.spinAngle))
         );
         part.worldPosition =
             parent.worldPosition +
-            mul(parent.worldRotation, 1.5f * scale * part.direction);
-        parts[i] = part;
+            mul(parent.worldRotation, 1.5f * m_scale * part.direction);
+        m_parts[i] = part;
 
-        matrices[i] = float4x4.TRS(
-            part.worldPosition, part.worldRotation, float3(scale)
-        );
+        // 4. 计算当前FractalPart的变换矩阵（旋转 + 位移）
+        var r = float3x3(part.worldRotation) * m_scale;
+        m_matrices[i] = float3x4(r.c0, r.c1, r.c2, part.worldPosition);
     }
+
+    /// <summary>
+    /// 每个FractalPart的旋转增量，用于更新旋转角度。
+    /// </summary>
+    public float m_spinAngleDelta;
+
+    /// <summary>
+    /// 每个FractalPart的缩放因子，用于缩放FractalPart。
+    /// </summary>
+    public float m_scale;
+
+    /// <summary>
+    /// 存储父节点数据的数组，表示上一层的FractalPart。
+    /// </summary>
+    [ReadOnly]
+    public NativeArray<FractalPart> m_parents;
+
+    /// <summary>
+    /// 存储当前FractalPart数据的数组，每个FractalPart的数据包括旋转、位置等信息。
+    /// </summary>
+    public NativeArray<FractalPart> m_parts;
+
+    /// <summary>
+    /// 存储变换矩阵（旋转 + 位移）的数组，用于渲染每个FractalPart的位置和旋转。
+    /// </summary>
+    [WriteOnly]
+    public NativeArray<float3x4> m_matrices;
 }
 
 public class Fractal : MonoBehaviour
@@ -58,22 +104,27 @@ public class Fractal : MonoBehaviour
 
     private void OnEnable()
     {
-        parts = new NativeArray<FractalPart>[depth];
-        matrices = new NativeArray<float4x4>[depth];
+        // 1. 初始化分形深度相关的数据结构
+        m_parts = new NativeArray<FractalPart>[m_depth];
+        m_matrices = new NativeArray<float3x4>[m_depth];
 
-        matricesBuffers = new ComputeBuffer[depth];
-        int stride = 16 * 4;
-        for (int i = 0, length = 1; i < parts.Length; i++, length *= 5)
+        // 2. 初始化计算缓冲区
+        m_matricesBuffers = new ComputeBuffer[m_depth];
+        int stride = 12 * 4; // 每个矩阵的字节大小
+        for (int i = 0, length = 1; i < m_parts.Length; i++, length *= 5)
         {
-            parts[i] = new NativeArray<FractalPart>(length, Allocator.Persistent);
-            matrices[i] = new NativeArray<float4x4>(length, Allocator.Persistent);
-            matricesBuffers[i] = new ComputeBuffer(length, stride);
+            m_parts[i] = new NativeArray<FractalPart>(length, Allocator.Persistent);
+            m_matrices[i] = new NativeArray<float3x4>(length, Allocator.Persistent);
+            m_matricesBuffers[i] = new ComputeBuffer(length, stride);
         }
 
-        parts[0][0] = CreatePart(0);
-        for (int li = 1; li < parts.Length; li++)
+        // 3. 设置根部分形
+        m_parts[0][0] = CreatePart(0);
+
+        // 4. 初始化每一层的FractalPart
+        for (int li = 1; li < m_parts.Length; li++)
         {
-            NativeArray<FractalPart> levelParts = parts[li];
+            NativeArray<FractalPart> levelParts = m_parts[li];
             for (int fpi = 0; fpi < levelParts.Length; fpi += 5)
             {
                 for (int ci = 0; ci < 5; ci++)
@@ -83,26 +134,29 @@ public class Fractal : MonoBehaviour
             }
         }
 
-        propertyBlock ??= new MaterialPropertyBlock();
+        // 5. 初始化材质属性块
+        m_propertyBlock ??= new MaterialPropertyBlock();
     }
 
     private void OnDisable()
     {
-        for (int i = 0; i < matricesBuffers.Length; i++)
+        // 1. 释放计算缓冲区和NativeArray
+        for (int i = 0; i < m_matricesBuffers.Length; i++)
         {
-            matricesBuffers[i].Release();
-            parts[i].Dispose();
-            matrices[i].Dispose();
+            m_matricesBuffers[i].Release();
+            m_parts[i].Dispose();
+            m_matrices[i].Dispose();
         }
 
-        parts = null;
-        matrices = null;
-        matricesBuffers = null;
+        // 2. 清理引用
+        m_parts = null;
+        m_matrices = null;
+        m_matricesBuffers = null;
     }
 
     private void OnValidate()
     {
-        if (parts != null)
+        if (m_parts != null)
         {
             OnDisable();
             OnEnable();
@@ -111,49 +165,56 @@ public class Fractal : MonoBehaviour
 
     private void Update()
     {
+        // 1. 计算旋转角度增量
         float spinAngleDelta = 0.125f * PI * Time.deltaTime;
-        FractalPart rootPart = parts[0][0];
+
+        // 2. 计算根FractalPart的世界旋转和世界位置
+        FractalPart rootPart = m_parts[0][0];
         rootPart.spinAngle += spinAngleDelta;
         rootPart.worldRotation = mul(transform.rotation,
             mul(rootPart.rotation, quaternion.RotateY(rootPart.spinAngle))
         );
         rootPart.worldPosition = transform.position;
-        parts[0][0] = rootPart;
-        float objectScale = transform.lossyScale.x;
-        matrices[0][0] = float4x4.TRS(
-            rootPart.worldPosition, rootPart.worldRotation, float3(objectScale)
-        );
+        m_parts[0][0] = rootPart;
 
+        // 3. 计算根FractalPart的矩阵
+        float objectScale = transform.lossyScale.x;
+        float3x3 r = float3x3(rootPart.worldRotation) * objectScale;
+        m_matrices[0][0] = float3x4(r.c0, r.c1, r.c2, rootPart.worldPosition);
+
+        // 4. 设置更新子FractalPart的作业, 并等待作业完成
         float scale = objectScale;
         JobHandle jobHandle = default;
-        for (int li = 1; li < parts.Length; li++)
+        for (int li = 1; li < m_parts.Length; li++)
         {
-            scale *= 0.5f;
+            scale *= 0.5f; // 每一层的缩放系数
             jobHandle = new UpdateFractalLevelJob
             {
-                spinAngleDelta = spinAngleDelta,
-                scale = scale,
-                parents = parts[li - 1],
-                parts = parts[li],
-                matrices = matrices[li]
-            }.Schedule(parts[li].Length, jobHandle);
+                m_spinAngleDelta = spinAngleDelta,
+                m_scale = scale,
+                m_parents = m_parts[li - 1],
+                m_parts = m_parts[li],
+                m_matrices = m_matrices[li]
+            }.ScheduleParallel(m_parts[li].Length, 5, jobHandle);
         }
 
         jobHandle.Complete();
 
-        for (int i = 0; i < matricesBuffers.Length; i++)
+        // 5. 更新计算缓冲区数据
+        for (int i = 0; i < m_matricesBuffers.Length; i++)
         {
-            matricesBuffers[i].SetData(matrices[i]);
+            m_matricesBuffers[i].SetData(m_matrices[i]);
         }
 
+        // 6. 绘制分形
         var bounds = new Bounds(rootPart.worldPosition, 3f * objectScale * Vector3.one);
-        for (int i = 0; i < matricesBuffers.Length; i++)
+        for (int i = 0; i < m_matricesBuffers.Length; i++)
         {
-            ComputeBuffer buffer = matricesBuffers[i];
-            buffer.SetData(matrices[i]);
-            propertyBlock.SetBuffer(matricesId, buffer);
+            ComputeBuffer buffer = m_matricesBuffers[i];
+            buffer.SetData(m_matrices[i]);
+            m_propertyBlock.SetBuffer(MatricesId, buffer);
             Graphics.DrawMeshInstancedProcedural(
-                mesh, 0, material, bounds, buffer.count, propertyBlock
+                m_mesh, 0, m_material, bounds, buffer.count, m_propertyBlock
             );
         }
     }
@@ -162,59 +223,92 @@ public class Fractal : MonoBehaviour
 
     #region 方法
 
-    FractalPart CreatePart(int childIndex) => new FractalPart
+    /// <summary>
+    /// 创建一个新的FractalPart（FractalPart），用于构建分形树的每个节点。
+    /// </summary>
+    /// <param name="childIndex">子节点的索引，用于选择FractalPart的方向和旋转。</param>
+    /// <returns>返回一个新的FractalPart（FractalPart），包含方向和旋转信息。</returns>
+    private FractalPart CreatePart(int childIndex) => new FractalPart
     {
-        direction = directions[childIndex],
-        rotation = rotations[childIndex]
+        direction = m_directions[childIndex],
+        rotation = m_rotations[childIndex]
     };
 
     #endregion
 
-    #region 事件
-
-    #endregion
-
-    #region 属性
-
-    #endregion
-
-
     #region 字段
 
+    /// <summary>
+    ///  分形的递归深度
+    /// </summary>
     [Range(1, 8)]
     [SerializeField]
-    private int depth = 4;
+    private int m_depth = 4;
 
+    /// <summary>
+    ///  分形使用的网格
+    /// </summary>
     [SerializeField]
-    private Mesh mesh;
+    private Mesh m_mesh;
 
+    /// <summary>
+    ///  分形使用的材质
+    /// </summary>
     [SerializeField]
-    private Material material;
+    private Material m_material;
 
-    private NativeArray<FractalPart>[] parts;
-    private NativeArray<float4x4>[] matrices;
+    /// <summary>
+    ///  分形的材质属性块,
+    /// </summary>
+    private static MaterialPropertyBlock m_propertyBlock;
 
-    static float3[] directions =
+    #endregion
+
+    #region Computer Shader 相关字段
+
+    /// <summary>
+    ///  分形的矩阵缓冲区
+    /// </summary>
+    private ComputeBuffer[] m_matricesBuffers;
+
+    /// <summary>
+    /// Shader中 分形的矩阵属性ID
+    /// </summary>
+    private static readonly int MatricesId = Shader.PropertyToID("_Matrices");
+
+    #endregion
+
+    #region Jobs System 相关
+
+    /// <summary>
+    /// 存储每一层FractalPart的数组。每一层的FractalPart都被单独存储在一个数组中。
+    /// </summary>
+    private NativeArray<FractalPart>[] m_parts;
+
+    /// <summary>
+    /// 存储每一层FractalPart的变换矩阵（float3x4）的数组，用于渲染FractalPart的位置和旋转。
+    /// </summary>
+    private NativeArray<float3x4>[] m_matrices;
+
+    /// <summary>
+    /// FractalPart的方向数组，用于表示分形的每个子节点方向。包含了六个方向：上、右、左、前、后。
+    /// </summary>
+    private static float3[] m_directions =
     {
         up(), right(), left(), forward(), back()
     };
 
-    static quaternion[] rotations =
+    /// <summary>
+    /// FractalPart的旋转数组，定义了不同方向上的旋转。包括默认旋转、绕Z轴旋转的角度和绕X轴旋转的角度。
+    /// </summary>
+    private static quaternion[] m_rotations =
     {
         quaternion.identity,
-        quaternion.RotateZ(-0.5f * PI), quaternion.RotateZ(0.5f * PI),
-        quaternion.RotateX(0.5f * PI), quaternion.RotateX(-0.5f * PI)
+        quaternion.RotateZ(-0.5f * PI),
+        quaternion.RotateZ(0.5f * PI),
+        quaternion.RotateX(0.5f * PI),
+        quaternion.RotateX(-0.5f * PI)
     };
-
-    private static MaterialPropertyBlock propertyBlock;
-
-    #endregion
-
-    #region Computer Shader 相关
-
-    private ComputeBuffer[] matricesBuffers;
-
-    private static readonly int matricesId = Shader.PropertyToID("_Matrices");
 
     #endregion
 }

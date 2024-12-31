@@ -285,9 +285,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c93917fd28594516bed84b332824d81e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  depth: 6
-  mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-  material: {fileID: 2100000, guid: 9e9cab73e558708468a22464f54e20eb, type: 2}
+  m_depth: 7
+  m_mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  m_material: {fileID: 2100000, guid: 9e9cab73e558708468a22464f54e20eb, type: 2}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
