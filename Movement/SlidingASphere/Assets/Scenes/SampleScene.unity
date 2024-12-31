@@ -532,14 +532,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e351a5b053614030b03522e470073b19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxSpeed: 7.6
-  maxAcceleration: 21.5
-  allowedArea:
+  m_maxSpeed: 10
+  m_maxAcceleration: 10
+  m_allowedArea:
     serializedVersion: 2
     x: -4.5
     y: -4.5
     width: 9
     height: 9
+  m_bounciness: 0.5
 --- !u!1 &1088836738
 GameObject:
   m_ObjectHideFlags: 0

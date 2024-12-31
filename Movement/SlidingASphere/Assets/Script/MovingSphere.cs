@@ -6,7 +6,7 @@ public class MovingSphere : MonoBehaviour
 {
     #region Unity 生命周期
 
-    void Update()
+    private void Update()
     {
         // 1. 获取输入并限制到单位长度
         var playerInput = default(Vector2);
