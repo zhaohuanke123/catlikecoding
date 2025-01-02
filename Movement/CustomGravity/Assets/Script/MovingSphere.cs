@@ -1,5 +1,10 @@
-﻿using UnityEngine;
+﻿using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.Serialization;
 
+/// <summary>
+///  球控制移动类
+/// </summary>
 public class MovingSphere : MonoBehaviour
 {
     #region Unity 生命周期
@@ -7,6 +12,7 @@ public class MovingSphere : MonoBehaviour
     private void Awake()
     {
         m_body = GetComponent<Rigidbody>();
+        m_body.useGravity = false;
         OnValidate();
     }
 
@@ -19,22 +25,20 @@ public class MovingSphere : MonoBehaviour
         playerInput = Vector2.ClampMagnitude(playerInput, 1f);
 
         //  2. 获取当前输入控制的速度
-        if (playerInputSpace)
+        if (m_playerInputSpace)
         {
-            Vector3 forward = playerInputSpace.forward;
-            forward.y = 0f;
-            forward.Normalize();
-            Vector3 right = playerInputSpace.right;
-            right.y = 0f;
-            right.Normalize();
-            m_desiredVelocity =
-                (forward * playerInput.y + right * playerInput.x) * m_maxSpeed;
+            m_rightAxis = ProjectDirectionOnPlane(m_playerInputSpace.right, m_upAxis);
+            m_forwardAxis =
+                ProjectDirectionOnPlane(m_playerInputSpace.forward, m_upAxis);
         }
         else
         {
-            m_desiredVelocity =
-                new Vector3(playerInput.x, 0f, playerInput.y) * m_maxSpeed;
+            m_rightAxis = ProjectDirectionOnPlane(Vector3.right, m_upAxis);
+            m_forwardAxis = ProjectDirectionOnPlane(Vector3.forward, m_upAxis);
         }
+
+        m_desiredVelocity =
+            new Vector3(playerInput.x, 0f, playerInput.y) * m_maxSpeed;
 
         // 3. 获取跳跃输入
         m_desiredJump |= Input.GetButtonDown("Jump");
@@ -42,6 +46,7 @@ public class MovingSphere : MonoBehaviour
 
     private void FixedUpdate()
     {
+        var gravity = CustomGravity.GetGravity(m_body.position, out m_upAxis);
         // 1. 更新状态，计算获取速度
         UpdateState();
         AdjustVelocity();
@@ -50,8 +55,10 @@ public class MovingSphere : MonoBehaviour
         if (m_desiredJump)
         {
             m_desiredJump = false;
-            Jump();
+            Jump(gravity);
         }
+
+        m_velocity += gravity * Time.deltaTime;
 
         // 3. RigidBody更新速度
         m_body.velocity = m_velocity;
@@ -83,7 +90,7 @@ public class MovingSphere : MonoBehaviour
     /// <summary>
     ///  跳跃逻辑
     /// </summary>
-    private void Jump()
+    private void Jump(Vector3 gravity)
     {
         // 1. 获取跳跃方向
         var jumpDirection = default(Vector3);
@@ -113,10 +120,10 @@ public class MovingSphere : MonoBehaviour
         m_jumpPhase += 1;
 
         // 2. 根据高度计算跳跃速度
-        float jumpSpeed = Mathf.Sqrt(-2f * Physics.gravity.y * m_jumpHeight);
+        float jumpSpeed = Mathf.Sqrt(2f * gravity.magnitude * m_jumpHeight);
 
         // 3. 根据接触面法线调整跳跃方向和速度
-        jumpDirection = (jumpDirection + Vector3.up).normalized;
+        jumpDirection = (jumpDirection + m_upAxis).normalized;
         float alignedSpeed = Vector3.Dot(m_velocity, jumpDirection);
         if (alignedSpeed > 0f)
         {
@@ -140,7 +147,8 @@ public class MovingSphere : MonoBehaviour
             // 2. 获取和接触物体的法线
             var normal = collision.GetContact(i).normal;
             // 3. 根据法线和最小地面角度点积判断是否在地面上 
-            if (normal.y >= minDot)
+            float upDot = Vector3.Dot(m_upAxis, normal);
+            if (upDot >= minDot)
             {
                 // onGround = true;
                 m_groundContactCount += 1;
@@ -148,7 +156,7 @@ public class MovingSphere : MonoBehaviour
                 m_contactNormal += normal;
             }
             // 4. 检查一下它是否是一个陡峭的接触。一个完美垂直墙壁的点积应该为零，但让我们宽松一些，接受所有大于−0.01 的值
-            else if (normal.y > -0.01f)
+            else if (upDot > -0.01f)
             {
                 m_steepContactCount += 1;
                 m_steepNormal += normal;
@@ -185,7 +193,7 @@ public class MovingSphere : MonoBehaviour
         }
         else
         {
-            m_contactNormal = Vector3.up;
+            m_contactNormal = m_upAxis;
         }
     }
 
@@ -208,10 +216,9 @@ public class MovingSphere : MonoBehaviour
     /// </summary>
     /// <param name="vector"> 需要投影的向量 </param>
     /// <returns> 投影后的向量 </returns>
-    private Vector3 ProjectOnContactPlane(Vector3 vector)
+    private Vector3 ProjectDirectionOnPlane(Vector3 direction, Vector3 normal)
     {
-        // Vector3.ProjectOnPlane() 不使用是因为，contactNormal 都是单位向量，不需要额外的计算
-        return vector - m_contactNormal * Vector3.Dot(vector, m_contactNormal);
+        return (direction - normal * Vector3.Dot(direction, normal)).normalized;
     }
 
     /// <summary>
@@ -220,8 +227,8 @@ public class MovingSphere : MonoBehaviour
     private void AdjustVelocity()
     {
         // 1. 获取平面的 x 和 z 轴 
-        var xAxis = ProjectOnContactPlane(Vector3.right).normalized;
-        var zAxis = ProjectOnContactPlane(Vector3.forward).normalized;
+        var xAxis = ProjectDirectionOnPlane(m_rightAxis, m_contactNormal).normalized;
+        var zAxis = ProjectDirectionOnPlane(m_forwardAxis, m_contactNormal).normalized;
 
         // 2. 获取当前速度在 x 和 z 轴的分量
         float currentX = Vector3.Dot(m_velocity, xAxis);
@@ -255,13 +262,15 @@ public class MovingSphere : MonoBehaviour
         }
 
         // 1. 使用射线检测从当前物体位置向下方是否有碰撞
-        if (!Physics.Raycast(m_body.position, Vector3.down, out var hit, m_probeDistance, m_probeMask))
+        if (!Physics.Raycast(m_body.position, -m_upAxis, out var hit, m_probeDistance, m_probeMask))
         {
             return false;
         }
 
         // 2. 如果碰撞表面的法线与世界坐标系的y轴的点积小于最小允许值，则表示该表面不可作为地面
-        if (hit.normal.y < GetMinDot(hit.collider.gameObject.layer))
+        // 修正upAxis
+        float upDot = Vector3.Dot(m_upAxis, hit.normal);
+        if (upDot < GetMinDot(hit.collider.gameObject.layer))
         {
             return false;
         }
@@ -298,7 +307,8 @@ public class MovingSphere : MonoBehaviour
         if (m_steepContactCount > 1)
         {
             m_steepNormal.Normalize();
-            if (m_steepNormal.y >= m_minGroundDotProduct)
+            float upDot = Vector3.Dot(m_upAxis, m_steepNormal);
+            if (upDot >= m_minGroundDotProduct)
             {
                 m_groundContactCount = 1;
                 m_contactNormal = m_steepNormal;
@@ -480,11 +490,23 @@ public class MovingSphere : MonoBehaviour
 
     #endregion
 
+    #region 相机修正字段
+
     /// <summary>
     /// 相机Transform，用作修正玩家移动方向
     /// </summary>
     [SerializeField]
-    Transform playerInputSpace = default;
+    private Transform m_playerInputSpace = default;
+
+    #endregion
+
+    #region 重力控制字段
+
+    private Vector3 m_upAxis;
+    private Vector3 m_rightAxis;
+    private Vector3 m_forwardAxis;
+
+    #endregion
 
     #endregion
 }

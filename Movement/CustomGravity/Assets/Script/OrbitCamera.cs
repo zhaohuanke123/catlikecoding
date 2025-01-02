@@ -1,35 +1,48 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
+/// <summary>
+///  轨道相机
+/// </summary>
 [RequireComponent(typeof(Camera))]
 public class OrbitCamera : MonoBehaviour
 {
     #region Unity 生命周期
 
+    private void OnValidate()
+    {
+        // 控制最大值不低于最小值
+        if (m_maxVerticalAngle < m_minVerticalAngle)
+        {
+            m_maxVerticalAngle = m_minVerticalAngle;
+        }
+    }
+
     private void Awake()
     {
         m_regularCamera = GetComponent<Camera>();
         m_focusPoint = m_focus.position;
-        transform.localRotation = Quaternion.Euler(m_orbitAngles);
+        transform.localRotation = m_orbitRotation = Quaternion.Euler(m_orbitAngles);
     }
 
     private void LateUpdate()
     {
+        m_gravityAlignment =
+            Quaternion.FromToRotation(m_gravityAlignment * Vector3.up, CustomGravity.GetUpAxis(m_focusPoint)) *
+            m_gravityAlignment;
+
         // 1. 更新焦点位置。
         UpdateFocusPoint();
 
-        Quaternion lookRotation;
         // 2. 检查是否需要手动或自动旋转。
         if (ManualRotation() || AutomaticRotation())
         {
             // 3. 限制旋转角度在设定范围内。
             ConstrainAngles();
-            lookRotation = Quaternion.Euler(m_orbitAngles);
-        }
-        else
-        {
-            lookRotation = transform.localRotation;
+            m_orbitRotation = Quaternion.Euler(m_orbitAngles);
         }
 
+        var lookRotation = m_gravityAlignment * m_orbitRotation;
         // 4. 计算相机的朝向和位置。
         var lookDirection = lookRotation * Vector3.forward;
         var lookPosition = m_focusPoint - lookDirection * m_distance;
@@ -57,15 +70,6 @@ public class OrbitCamera : MonoBehaviour
         transform.SetPositionAndRotation(lookPosition, lookRotation);
     }
 
-    private void OnValidate()
-    {
-        // 控制最大值不低于最小值
-        if (m_maxVerticalAngle < m_minVerticalAngle)
-        {
-            m_maxVerticalAngle = m_minVerticalAngle;
-        }
-    }
-
     #endregion
 
     #region 方法
@@ -91,7 +95,7 @@ public class OrbitCamera : MonoBehaviour
             float t = 1f;
             if (distance > 0.01f && m_focusCentering > 0f)
             {
-                t = Mathf.Pow(1f - m_focusCentering, Time.deltaTime);
+                t = Mathf.Pow(1f - m_focusCentering, Time.unscaledDeltaTime);
             }
 
             // 5. 如果超过焦点半径，则限制移动范围。
@@ -136,26 +140,6 @@ public class OrbitCamera : MonoBehaviour
     }
 
     /// <summary>
-    /// 限制旋转角度。
-    /// </summary>
-    private void ConstrainAngles()
-    {
-        // 1. 限制垂直角度。
-        m_orbitAngles.x =
-            Mathf.Clamp(m_orbitAngles.x, m_minVerticalAngle, m_maxVerticalAngle);
-
-        // 2. 保持水平角度在 0-360 度范围内。
-        if (m_orbitAngles.y < 0f)
-        {
-            m_orbitAngles.y += 360f;
-        }
-        else if (m_orbitAngles.y >= 360f)
-        {
-            m_orbitAngles.y -= 360f;
-        }
-    }
-
-    /// <summary>
     ///  是否需要自动旋转
     /// </summary>
     /// <returns> 有则返回 true，否则返回 false </returns>
@@ -168,10 +152,8 @@ public class OrbitCamera : MonoBehaviour
         }
 
         // 2. 根据移动方向计算目标角度。
-        var movement = new Vector2(
-            m_focusPoint.x - m_previousFocusPoint.x,
-            m_focusPoint.z - m_previousFocusPoint.z
-        );
+        var alignedDelta = Quaternion.Inverse(m_gravityAlignment) * (m_focusPoint - m_previousFocusPoint);
+        var movement = new Vector2(alignedDelta.x, alignedDelta.z);
         float movementDeltaSqr = movement.sqrMagnitude;
 
         // 3. 如果移动距离很小，不自动旋转。
@@ -200,6 +182,26 @@ public class OrbitCamera : MonoBehaviour
         m_orbitAngles.y =
             Mathf.MoveTowardsAngle(m_orbitAngles.y, headingAngle, rotationChange);
         return true;
+    }
+
+    /// <summary>
+    /// 限制旋转角度。
+    /// </summary>
+    private void ConstrainAngles()
+    {
+        // 1. 限制垂直角度。
+        m_orbitAngles.x =
+            Mathf.Clamp(m_orbitAngles.x, m_minVerticalAngle, m_maxVerticalAngle);
+
+        // 2. 保持水平角度在 0-360 度范围内。
+        if (m_orbitAngles.y < 0f)
+        {
+            m_orbitAngles.y += 360f;
+        }
+        else if (m_orbitAngles.y >= 360f)
+        {
+            m_orbitAngles.y -= 360f;
+        }
     }
 
     #endregion
@@ -231,11 +233,11 @@ public class OrbitCamera : MonoBehaviour
             // 盒体投射需要一个 3D 向量，其中包含盒体的半扩展，这意味着其宽度、高度和深度的二分之一。
             // 高度的一半可以通过取相机视野角（以弧度为单位）的正切值，并按其近裁剪平面距离缩放来求得。宽度的一半是通过将其按相机的纵横比缩放来得到的。盒子的深度为零。
             Vector3 halfExtends;
-            halfExtends.y =
-                m_regularCamera.nearClipPlane *
-                Mathf.Tan(0.5f * Mathf.Deg2Rad * m_regularCamera.fieldOfView);
+            halfExtends.y = m_regularCamera.nearClipPlane *
+                            Mathf.Tan(0.5f * Mathf.Deg2Rad * m_regularCamera.fieldOfView);
             halfExtends.x = halfExtends.y * m_regularCamera.aspect;
             halfExtends.z = 0f;
+
             return halfExtends;
         }
     }
@@ -340,6 +342,20 @@ public class OrbitCamera : MonoBehaviour
     [SerializeField]
     [Range(0f, 90f)]
     private float m_alignSmoothRange = 45f;
+
+    #endregion
+
+    #region 重力修正相关字段
+
+    /// <summary>
+    /// 重力对物体的旋转校正，用于调整物体的旋转，使其与重力方向对齐。
+    /// </summary>
+    private Quaternion m_gravityAlignment = Quaternion.identity;
+
+    /// <summary>
+    /// 轨道旋转四元数
+    /// </summary>
+    private Quaternion m_orbitRotation;
 
     #endregion
 
