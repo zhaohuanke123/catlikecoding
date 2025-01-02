@@ -480,6 +480,9 @@ public class MovingSphere : MonoBehaviour
 
     #endregion
 
+    /// <summary>
+    /// 相机Transform，用作修正玩家移动方向
+    /// </summary>
     [SerializeField]
     Transform playerInputSpace = default;
 
