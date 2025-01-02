@@ -19,8 +19,22 @@ public class MovingSphere : MonoBehaviour
         playerInput = Vector2.ClampMagnitude(playerInput, 1f);
 
         //  2. 获取当前输入控制的速度
-        m_desiredVelocity =
-            new Vector3(playerInput.x, 0f, playerInput.y) * m_maxSpeed;
+        if (playerInputSpace)
+        {
+            Vector3 forward = playerInputSpace.forward;
+            forward.y = 0f;
+            forward.Normalize();
+            Vector3 right = playerInputSpace.right;
+            right.y = 0f;
+            right.Normalize();
+            m_desiredVelocity =
+                (forward * playerInput.y + right * playerInput.x) * m_maxSpeed;
+        }
+        else
+        {
+            m_desiredVelocity =
+                new Vector3(playerInput.x, 0f, playerInput.y) * m_maxSpeed;
+        }
 
         // 3. 获取跳跃输入
         m_desiredJump |= Input.GetButtonDown("Jump");
@@ -444,6 +458,8 @@ public class MovingSphere : MonoBehaviour
 
     #endregion
 
+    #region 楼梯逻辑字段
+
     /// <summary>
     ///  最大楼梯角度 
     /// </summary>
@@ -461,6 +477,11 @@ public class MovingSphere : MonoBehaviour
     /// </summary>
     [SerializeField]
     private LayerMask m_stairsMask = -1;
+
+    #endregion
+
+    [SerializeField]
+    Transform playerInputSpace = default;
 
     #endregion
 }
