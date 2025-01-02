@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 6315726874829106889}
   - component: {fileID: 6315726874829106890}
   - component: {fileID: 6315726874829106891}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -224,12 +224,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e351a5b053614030b03522e470073b19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_maxSpeed: 10
-  m_maxAcceleration: 10
-  maxAirAcceleration: 0
-  jumpHeight: 4
-  maxAirJumps: 0
-  maxGroundAngle: 40.3
+  m_maxSpeed: 27.6
+  m_maxAcceleration: 11.3
+  m_maxAirAcceleration: 1
+  m_jumpHeight: 3
+  m_maxAirJumps: 1
+  m_maxGroundAngle: 25
+  maxSnapSpeed: 100
+  probeDistance: 1
+  probeMask:
+    serializedVersion: 2
+    m_Bits: 54
+  maxStairsAngle: 50
+  stairsMask:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!54 &6315726874829106891
 Rigidbody:
   m_ObjectHideFlags: 0
