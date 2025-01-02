@@ -224,21 +224,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e351a5b053614030b03522e470073b19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_maxSpeed: 27.6
-  m_maxAcceleration: 11.3
+  m_maxSpeed: 10
+  m_maxAcceleration: 10
   m_maxAirAcceleration: 1
-  m_jumpHeight: 3
+  m_jumpHeight: 1.67
   m_maxAirJumps: 1
-  m_maxGroundAngle: 25
-  maxSnapSpeed: 100
-  probeDistance: 1
-  probeMask:
+  m_maxGroundAngle: 40
+  m_maxSnapSpeed: 50
+  m_probeDistance: 1
+  m_probeMask:
     serializedVersion: 2
-    m_Bits: 54
-  maxStairsAngle: 50
-  stairsMask:
+    m_Bits: 1075
+  m_maxStairsAngle: 50
+  m_stairsMask:
     serializedVersion: 2
     m_Bits: 1024
+  playerInputSpace: {fileID: 0}
 --- !u!54 &6315726874829106891
 Rigidbody:
   m_ObjectHideFlags: 0

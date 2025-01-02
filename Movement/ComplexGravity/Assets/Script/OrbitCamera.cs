@@ -27,9 +27,7 @@ public class OrbitCamera : MonoBehaviour
 
     private void LateUpdate()
     {
-        m_gravityAlignment =
-            Quaternion.FromToRotation(m_gravityAlignment * Vector3.up, CustomGravity.GetUpAxis(m_focusPoint)) *
-            m_gravityAlignment;
+        UpdateGravityAlignment();
 
         // 1. 更新焦点位置。
         UpdateFocusPoint();
@@ -204,6 +202,28 @@ public class OrbitCamera : MonoBehaviour
         }
     }
 
+    void UpdateGravityAlignment()
+    {
+        Vector3 fromUp = m_gravityAlignment * Vector3.up;
+        Vector3 toUp = CustomGravity.GetUpAxis(m_focusPoint);
+        float dot = Mathf.Clamp(Vector3.Dot(fromUp, toUp), -1f, 1f);
+        float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
+        float maxAngle = upAlignmentSpeed * Time.deltaTime;
+
+        Quaternion newAlignment =
+            Quaternion.FromToRotation(fromUp, toUp) * m_gravityAlignment;
+        if (angle <= maxAngle)
+        {
+            m_gravityAlignment = newAlignment;
+        }
+        else
+        {
+            m_gravityAlignment = Quaternion.SlerpUnclamped(
+                m_gravityAlignment, newAlignment, maxAngle / angle
+            );
+        }
+    }
+
     #endregion
 
     #region 静态工具方法
@@ -356,6 +376,13 @@ public class OrbitCamera : MonoBehaviour
     /// 轨道旋转四元数
     /// </summary>
     private Quaternion m_orbitRotation;
+
+    /// <summary>
+    /// 向上对齐速度，限制相机如何快速调整其向上矢量，以每秒度数为单位表示
+    /// </summary>
+    [SerializeField]
+    [Min(0f)]
+    float upAlignmentSpeed = 360f;
 
     #endregion
 

@@ -19,8 +19,22 @@ public class MovingSphere : MonoBehaviour
         playerInput = Vector2.ClampMagnitude(playerInput, 1f);
 
         //  2. 获取当前输入控制的速度
-        m_desiredVelocity =
-            new Vector3(playerInput.x, 0f, playerInput.y) * m_maxSpeed;
+        if (playerInputSpace)
+        {
+            Vector3 forward = playerInputSpace.forward;
+            forward.y = 0f;
+            forward.Normalize();
+            Vector3 right = playerInputSpace.right;
+            right.y = 0f;
+            right.Normalize();
+            m_desiredVelocity =
+                (forward * playerInput.y + right * playerInput.x) * m_maxSpeed;
+        }
+        else
+        {
+            m_desiredVelocity =
+                new Vector3(playerInput.x, 0f, playerInput.y) * m_maxSpeed;
+        }
 
         // 3. 获取跳跃输入
         m_desiredJump |= Input.GetButtonDown("Jump");
@@ -101,7 +115,8 @@ public class MovingSphere : MonoBehaviour
         // 2. 根据高度计算跳跃速度
         float jumpSpeed = Mathf.Sqrt(-2f * Physics.gravity.y * m_jumpHeight);
 
-        // 3. 根据接触面法线调整速度 
+        // 3. 根据接触面法线调整跳跃方向和速度
+        jumpDirection = (jumpDirection + Vector3.up).normalized;
         float alignedSpeed = Vector3.Dot(m_velocity, jumpDirection);
         if (alignedSpeed > 0f)
         {
@@ -409,11 +424,6 @@ public class MovingSphere : MonoBehaviour
 
     #endregion
 
-    /// <summary>
-    ///  材质属性块
-    /// </summary>
-    private MaterialPropertyBlock m_propBlock;
-
     #region 地面吸附逻辑字段
 
     /// <summary>
@@ -448,6 +458,8 @@ public class MovingSphere : MonoBehaviour
 
     #endregion
 
+    #region 楼梯逻辑字段
+
     /// <summary>
     ///  最大楼梯角度 
     /// </summary>
@@ -465,6 +477,14 @@ public class MovingSphere : MonoBehaviour
     /// </summary>
     [SerializeField]
     private LayerMask m_stairsMask = -1;
+
+    #endregion
+
+    /// <summary>
+    /// 相机Transform，用作修正玩家移动方向
+    /// </summary>
+    [SerializeField]
+    Transform playerInputSpace = default;
 
     #endregion
 }
