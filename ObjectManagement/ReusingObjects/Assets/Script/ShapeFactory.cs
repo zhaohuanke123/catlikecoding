@@ -17,7 +17,10 @@ public class ShapeFactory : ScriptableObject
     /// <returns>一个创建的Shape实例，已设置材质和形状ID。</returns>
     public Shape Get(int shapeId = 0, int materialId = 0)
     {
+        // 1. 根据形状ID实例化一个新的Shaoe实例
         Shape instance = Instantiate(m_prefabs[shapeId]);
+        
+        // 2. 为该实例设置材质
         instance.ShapeId = shapeId;
         instance.SetMaterial(m_materials[materialId], materialId);
         return instance;

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -34,6 +33,10 @@ public class Game : PersistableObject
             BeginNewGame();
             m_storage.Load(this);
         }
+        else if (Input.GetKeyDown(destroyKey))
+        {
+            DestroyShape();
+        }
     }
 
     #endregion
@@ -45,12 +48,16 @@ public class Game : PersistableObject
     /// </summary>
     private void CreateShape()
     {
+        // 1. 获取一个随机形状
         Shape instance = m_shapeFactory.GetRandom();
+
+        // 2. 随机设置物体的位置、旋转和缩放
         Transform t = instance.transform;
         t.localPosition = Random.insideUnitSphere * 5f;
         t.localRotation = Random.rotation;
         t.localScale = Vector3.one * Random.Range(0.1f, 1f);
 
+        // 3. 随机设置物体的颜色
         instance.SetColor(Random.ColorHSV(
             hueMin: 0f, hueMax: 1f,
             saturationMin: 0.5f, saturationMax: 1f,
@@ -58,6 +65,7 @@ public class Game : PersistableObject
             alphaMin: 1f, alphaMax: 1f
         ));
 
+        // 4. 将物体添加到物体列表中
         m_shapes.Add(instance);
     }
 
@@ -101,7 +109,7 @@ public class Game : PersistableObject
     /// <param name="reader">用于读取数据的GameDataReader实例。</param>
     public override void Load(GameDataReader reader)
     {
-        //  读取存档版本
+        //  1. 读取存档版本
         int version = reader.Version;
         if (version > SaveVersion)
         {
@@ -109,16 +117,33 @@ public class Game : PersistableObject
             return;
         }
 
-        // 1. 读取物体数量 (考虑版本差异)
+        // 2. 读取物体数量 (考虑版本差异)
         int count = version <= 0 ? -version : reader.ReadInt();
+
+        // 3. 读取每个物体的状态
         for (int i = 0; i < count; i++)
         {
-            // 2. 实例化新物体并加载其状态
+            // 实例化新物体并加载其状态
             int shapeId = version > 0 ? reader.ReadInt() : 0;
             int materialId = version > 0 ? reader.ReadInt() : 0;
             Shape instance = m_shapeFactory.Get(shapeId, materialId);
             instance.Load(reader);
             m_shapes.Add(instance);
+        }
+    }
+
+    /// <summary>
+    ///  如果物体列表中有物体，则销毁一个物体。
+    /// </summary>
+    void DestroyShape()
+    {
+        if (m_shapes.Count > 0)
+        {
+            int index = Random.Range(0, m_shapes.Count);
+            Destroy(m_shapes[index]);
+            int lastIndex = m_shapes.Count - 1;
+            m_shapes[index] = m_shapes[lastIndex];
+            m_shapes.RemoveAt(lastIndex);
         }
     }
 
@@ -147,6 +172,8 @@ public class Game : PersistableObject
     /// 用于加载保存游戏状态的按键（默认为L）。
     /// </summary>
     public KeyCode m_loadKey = KeyCode.L;
+
+    public KeyCode destroyKey = KeyCode.X;
 
     #endregion
 
