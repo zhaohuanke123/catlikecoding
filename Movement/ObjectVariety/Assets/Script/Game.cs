@@ -1,22 +1,24 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
+/// <summary>
+///  代表游戏的主要类，负责生成物体、保存和加载游戏状态。
+/// </summary>
 public class Game : PersistableObject
 {
     #region Unity 生命周期
 
     private void Awake()
     {
-        m_objects = new List<PersistableObject>();
+        m_shapes = new List<Shape>();
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(m_createKey))
         {
-            CreateObject();
+            CreateShape();
         }
         else if (Input.GetKeyDown(m_newGameKey))
         {
@@ -24,7 +26,7 @@ public class Game : PersistableObject
         }
         else if (Input.GetKeyDown(m_saveKey))
         {
-            m_storage.Save(this);
+            m_storage.Save(this, SaveVersion);
         }
         else if (Input.GetKeyDown(m_loadKey))
         {
@@ -40,15 +42,22 @@ public class Game : PersistableObject
     /// <summary>
     /// 创建一个物体
     /// </summary>
-    private void CreateObject()
+    private void CreateShape()
     {
-        PersistableObject o = Instantiate(m_prefab);
-        Transform t = o.transform;
+        Shape instance = m_shapeFactory.GetRandom();
+        Transform t = instance.transform;
         t.localPosition = Random.insideUnitSphere * 5f;
         t.localRotation = Random.rotation;
         t.localScale = Vector3.one * Random.Range(0.1f, 1f);
 
-        m_objects.Add(o);
+        instance.SetColor(Random.ColorHSV(
+            hueMin: 0f, hueMax: 1f,
+            saturationMin: 0.5f, saturationMax: 1f,
+            valueMin: 0.25f, valueMax: 1f,
+            alphaMin: 1f, alphaMax: 1f
+        ));
+
+        m_shapes.Add(instance);
     }
 
     /// <summary>
@@ -57,12 +66,12 @@ public class Game : PersistableObject
     private void BeginNewGame()
     {
         // 销毁所有已存在的物体
-        for (int i = 0; i < m_objects.Count; i++)
+        for (int i = 0; i < m_shapes.Count; i++)
         {
-            Destroy(m_objects[i].gameObject);
+            Destroy(m_shapes[i].gameObject);
         }
 
-        m_objects.Clear();
+        m_shapes.Clear();
     }
 
     /// <summary>
@@ -71,11 +80,17 @@ public class Game : PersistableObject
     /// <param name="writer">用于写入数据的GameDataWriter实例。</param>
     public override void Save(GameDataWriter writer)
     {
+        // 不需要写入存档版本，因为PersistentStorage会在写入数据时写入版本号。
+        // // 通过在写入存档版本时不直接写入版本号来实现区分存档版本和对象计数。
+        // writer.Write(-saveVersion);
+
         // 写入物体数量和每个物体的状态
-        writer.Write(m_objects.Count);
-        for (int i = 0; i < m_objects.Count; i++)
+        writer.Write(m_shapes.Count);
+        for (int i = 0; i < m_shapes.Count; i++)
         {
-            m_objects[i].Save(writer);
+            writer.Write(m_shapes[i].ShapeId);
+            writer.Write(m_shapes[i].MaterialId);
+            m_shapes[i].Save(writer);
         }
     }
 
@@ -85,14 +100,24 @@ public class Game : PersistableObject
     /// <param name="reader">用于读取数据的GameDataReader实例。</param>
     public override void Load(GameDataReader reader)
     {
-        // 1. 读取物体数量
-        int count = reader.ReadInt();
+        //  读取存档版本
+        int version = reader.Version;
+        if (version > SaveVersion)
+        {
+            Debug.LogError("Unsupported future save version " + version);
+            return;
+        }
+
+        // 1. 读取物体数量 (考虑版本差异)
+        int count = version <= 0 ? -version : reader.ReadInt();
         for (int i = 0; i < count; i++)
         {
             // 2. 实例化新物体并加载其状态
-            PersistableObject o = Instantiate(m_prefab);
-            o.Load(reader);
-            m_objects.Add(o);
+            int shapeId = version > 0 ? reader.ReadInt() : 0;
+            int materialId = version > 0 ? reader.ReadInt() : 0;
+            Shape instance = m_shapeFactory.Get(shapeId, materialId);
+            instance.Load(reader);
+            m_shapes.Add(instance);
         }
     }
 
@@ -124,20 +149,22 @@ public class Game : PersistableObject
 
     #endregion
 
-    /// <summary>
-    /// 物体的预制件，用于创建新的PersistableObject实例。
-    /// </summary>
-    public PersistableObject m_prefab;
+    public ShapeFactory m_shapeFactory;
 
     /// <summary>
     /// 存储当前游戏的物体列表。
     /// </summary>
-    private List<PersistableObject> m_objects;
+    private List<Shape> m_shapes;
 
     /// <summary>
     /// 游戏存储实例，负责游戏数据的保存和加载。
     /// </summary>
     public PersistentStorage m_storage;
+
+    /// <summary>
+    ///  游戏数据文件版本
+    /// </summary>
+    private const int SaveVersion = 1;
 
     #endregion
 }

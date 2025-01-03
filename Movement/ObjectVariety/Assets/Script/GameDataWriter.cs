@@ -64,6 +64,18 @@ public class GameDataWriter
         m_writer.Write(value.z);
     }
 
+    /// <summary>
+    /// 将一个Color类型的值写入到BinaryWriter中。Color由四个float值组成。
+    /// </summary>
+    /// <param name="value">需要写入的Color值。</param>
+    public void Write(Color value)
+    {
+        m_writer.Write(value.r);
+        m_writer.Write(value.g);
+        m_writer.Write(value.b);
+        m_writer.Write(value.a);
+    }
+
     #endregion
 
     #region 字段

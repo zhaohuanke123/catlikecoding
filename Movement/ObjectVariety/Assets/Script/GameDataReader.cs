@@ -12,9 +12,11 @@ public class GameDataReader
     /// 初始化GameDataReader并保存传入的BinaryReader实例。
     /// </summary>
     /// <param name="reader">需要包装的BinaryReader实例。</param>
-    public GameDataReader(BinaryReader reader)
+    /// <param name="version"> 读取的数据版本。 </param>
+    public GameDataReader(BinaryReader reader, int version)
     {
         this.m_reader = reader;
+        this.Version = version;
     }
 
     #endregion
@@ -66,6 +68,29 @@ public class GameDataReader
         value.z = m_reader.ReadSingle();
         return value;
     }
+
+    /// <summary>
+    /// 从BinaryReader中读取一个Color值。Color由四个float值组成。
+    /// </summary>
+    /// <returns>读取的Color值。</returns>
+    public Color ReadColor()
+    {
+        Color value;
+        value.r = m_reader.ReadSingle();
+        value.g = m_reader.ReadSingle();
+        value.b = m_reader.ReadSingle();
+        value.a = m_reader.ReadSingle();
+        return value;
+    }
+
+    #endregion
+
+    #region 属性
+
+    /// <summary>
+    ///  读取的数据版本。
+    /// </summary>
+    public int Version { get; }
 
     #endregion
 
