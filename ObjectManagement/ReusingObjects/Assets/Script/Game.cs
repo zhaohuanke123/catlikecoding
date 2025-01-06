@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 /// <summary>
@@ -33,8 +34,22 @@ public class Game : PersistableObject
             BeginNewGame();
             m_storage.Load(this);
         }
-        else if (Input.GetKeyDown(destroyKey))
+        else if (Input.GetKeyDown(m_destroyKey))
         {
+            DestroyShape();
+        }
+
+        m_creationProgress += Time.deltaTime * CreationSpeed;
+        while (m_creationProgress >= 1f)
+        {
+            m_creationProgress -= 1f;
+            CreateShape();
+        }
+
+        m_destructionProgress += Time.deltaTime * DestructionSpeed;
+        while (m_destructionProgress >= 1f)
+        {
+            m_destructionProgress -= 1f;
             DestroyShape();
         }
     }
@@ -77,7 +92,7 @@ public class Game : PersistableObject
         // 销毁所有已存在的物体
         for (int i = 0; i < m_shapes.Count; i++)
         {
-            Destroy(m_shapes[i].gameObject);
+            m_shapeFactory.Reclaim(m_shapes[i]);
         }
 
         m_shapes.Clear();
@@ -135,17 +150,31 @@ public class Game : PersistableObject
     /// <summary>
     ///  如果物体列表中有物体，则销毁一个物体。
     /// </summary>
-    void DestroyShape()
+    private void DestroyShape()
     {
         if (m_shapes.Count > 0)
         {
             int index = Random.Range(0, m_shapes.Count);
-            Destroy(m_shapes[index]);
+            m_shapeFactory.Reclaim(m_shapes[index]);
             int lastIndex = m_shapes.Count - 1;
             m_shapes[index] = m_shapes[lastIndex];
             m_shapes.RemoveAt(lastIndex);
         }
     }
+
+    #endregion
+
+    #region 属性
+
+    /// <summary>
+    /// 创建速度
+    /// </summary>
+    public float CreationSpeed { get; set; } = 5;
+
+    /// <summary>
+    ///  销毁速度
+    /// </summary>
+    public float DestructionSpeed { get; set; } = 2;
 
     #endregion
 
@@ -173,7 +202,10 @@ public class Game : PersistableObject
     /// </summary>
     public KeyCode m_loadKey = KeyCode.L;
 
-    public KeyCode destroyKey = KeyCode.X;
+    /// <summary>
+    ///  用于销毁物体的按键（默认为X）。
+    /// </summary>
+    public KeyCode m_destroyKey = KeyCode.X;
 
     #endregion
 
@@ -193,6 +225,17 @@ public class Game : PersistableObject
     ///  游戏数据文件版本
     /// </summary>
     private const int SaveVersion = 1;
+
+    /// <summary>
+    /// 生成物体的进度, 当该值达到 1 时，应该创建一个新的形状
+    /// </summary>
+    private float m_creationProgress;
+
+
+    /// <summary>
+    ///  销毁物体的进度, 当该值达到 1 时，应该销毁一个形状
+    /// </summary>
+    private float m_destructionProgress;
 
     #endregion
 }
