@@ -15,14 +15,17 @@ public class Game : PersistableObject
     // private void Awake()
     private void Start()
     {
+        // 1. 化用于存储当前场景中的所有 Shape 实例。
         m_shapes = new List<Shape>();
-        
+
+        // 2. 在编辑器模式下进行特殊场景检查
         if (Application.isEditor)
         {
+            // 1. 遍历当前加载的所有场景，寻找名称包含 "Level " 的场景
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
                 Scene loadedScene = SceneManager.GetSceneAt(i);
-                if (loadedScene.name.Contains("Level "))
+                if (loadedScene.name.Contains(LevelPrefix))
                 {
                     SceneManager.SetActiveScene(loadedScene);
                     m_loadedLevelBuildIndex = loadedScene.buildIndex;
@@ -31,7 +34,8 @@ public class Game : PersistableObject
             }
         }
 
-        StartCoroutine(LoadLevel(1));
+        // 3. 如果不在编辑器模式或没有找到合适的场景，异步加载默认关卡 1
+        StartCoroutine(LoadLevel(DefaultLevelIndex));
     }
 
     private void Update()
@@ -66,7 +70,7 @@ public class Game : PersistableObject
                 if (Input.GetKeyDown(KeyCode.Alpha0 + i))
                 {
                     BeginNewGame();
-                    StartCoroutine(LoadLevel(i));
+                    StartCoroutine(LoadLevel(DefaultLevelIndex));
                     return;
                 }
             }
@@ -295,6 +299,16 @@ public class Game : PersistableObject
     private float m_destructionProgress;
 
     #region 关卡相关
+
+    /// <summary>
+    ///  关卡名称前缀常量
+    /// </summary>
+    private const string LevelPrefix = "Level ";
+
+    /// <summary>
+    ///  默认加载的关卡索引
+    /// </summary>
+    private const int DefaultLevelIndex = 1;
 
     /// <summary>
     ///  支持的关卡数量

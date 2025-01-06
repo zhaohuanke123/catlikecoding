@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,18 +12,40 @@ public class Game : PersistableObject
 {
     #region Unity 生命周期
 
+    /// <summary>
+    /// 在每次禁用组件启用时被调用。在游玩模式下重新编译时，首先禁用所有活动组件，然后保存游戏状态，进行编译，恢复游戏状态，然后重新启用之前活动的组件。
+    /// </summary>
+    private void OnEnable()
+    {
+        Instance = this;
+    }
+
+    /// <summary>
+    /// 还有一个 OnDisable 方法，它在重新编译之前被调用。
+    /// </summary>
+    /// <exception cref="NotImplementedException"></exception>
+    // private void OnDisable()
+    // {
+    // }
+
     // 在 Awake 中尝试太早了，但如果我们稍作延迟并改用 Start 方法，它就能工作。
     // private void Awake()
     private void Start()
     {
+        // 1. 保存单例
+        Instance = this;
+
+        // 2. 化用于存储当前场景中的所有 Shape 实例。
         m_shapes = new List<Shape>();
-        
+
+        // 3. 在编辑器模式下进行特殊场景检查
         if (Application.isEditor)
         {
+            // 1. 遍历当前加载的所有场景，寻找名称包含 "Level " 的场景
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
                 Scene loadedScene = SceneManager.GetSceneAt(i);
-                if (loadedScene.name.Contains("Level "))
+                if (loadedScene.name.Contains(LevelPrefix))
                 {
                     SceneManager.SetActiveScene(loadedScene);
                     m_loadedLevelBuildIndex = loadedScene.buildIndex;
@@ -31,7 +54,8 @@ public class Game : PersistableObject
             }
         }
 
-        StartCoroutine(LoadLevel(1));
+        // 4. 如果不在编辑器模式或没有找到合适的场景，异步加载默认关卡 1
+        StartCoroutine(LoadLevel(DefaultLevelIndex));
     }
 
     private void Update()
@@ -102,7 +126,7 @@ public class Game : PersistableObject
 
         // 2. 随机设置物体的位置、旋转和缩放
         Transform t = instance.transform;
-        t.localPosition = Random.insideUnitSphere * 5f;
+        t.localPosition = SpawnZoneOfLevel.SpawnPoint;
         t.localRotation = Random.rotation;
         t.localScale = Vector3.one * Random.Range(0.1f, 1f);
 
@@ -169,7 +193,7 @@ public class Game : PersistableObject
 
         // 2. 读取物体数量和切换保存的场景 (考虑版本差异)
         int count = version <= 0 ? -version : reader.ReadInt();
-        StartCoroutine(LoadLevel(version < 2 ? 1 : reader.ReadInt()));
+        StartCoroutine(LoadLevel(version < 2 ? DefaultLevelIndex : reader.ReadInt()));
 
         // 3. 读取每个物体的状态
         for (int i = 0; i < count; i++)
@@ -200,7 +224,7 @@ public class Game : PersistableObject
 
     private IEnumerator LoadLevel(int levelBuildIndex)
     {
-        // 1. 防止场景加载中调用Uodate
+        // 1. 防止场景加载中调用Update
         enabled = false;
 
         // 2. 卸载当前场景
@@ -222,6 +246,11 @@ public class Game : PersistableObject
     #region 属性
 
     /// <summary>
+    /// Game单例
+    /// </summary>
+    public static Game Instance { get; private set; }
+
+    /// <summary>
     /// 创建速度
     /// </summary>
     public float CreationSpeed { get; set; } = 5;
@@ -230,6 +259,11 @@ public class Game : PersistableObject
     ///  销毁速度
     /// </summary>
     public float DestructionSpeed { get; set; } = 2;
+
+    /// <summary>
+    ///  生成区域引用，由每个关卡的GameLevel实例来设置引用
+    /// </summary>
+    public SpawnZone SpawnZoneOfLevel { get; set; }
 
     #endregion
 
@@ -267,7 +301,8 @@ public class Game : PersistableObject
     /// <summary>
     ///  形状工厂实例，用于生成形状。
     /// </summary>
-    public ShapeFactory m_shapeFactory;
+    [SerializeField]
+    private ShapeFactory m_shapeFactory;
 
     /// <summary>
     /// 存储当前游戏的物体列表。
@@ -295,6 +330,16 @@ public class Game : PersistableObject
     private float m_destructionProgress;
 
     #region 关卡相关
+
+    /// <summary>
+    ///  关卡名称前缀常量
+    /// </summary>
+    private const string LevelPrefix = "Level ";
+
+    /// <summary>
+    ///  默认加载的关卡索引
+    /// </summary>
+    private const int DefaultLevelIndex = 1;
 
     /// <summary>
     ///  支持的关卡数量

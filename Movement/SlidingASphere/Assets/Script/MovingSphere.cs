@@ -69,7 +69,8 @@ public class MovingSphere : MonoBehaviour
     /// <summary>
     /// 最大加速度
     /// </summary>
-    [SerializeField, Range(0f, 100f)]
+    [SerializeField]
+    [Range(0f, 100f)]
     private float m_maxAcceleration = 10f;
 
     /// <summary>
@@ -86,7 +87,8 @@ public class MovingSphere : MonoBehaviour
     /// <summary>
     ///  弹力
     /// </summary>
-    [SerializeField, Range(0f, 1f)]
+    [SerializeField]
+    [Range(0f, 1f)]
     private float m_bounciness = 0.5f;
 
     #endregion

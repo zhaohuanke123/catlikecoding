@@ -345,7 +345,7 @@ MonoBehaviour:
   m_destroyKey: 120
   m_shapeFactory: {fileID: 11400000, guid: bceb3e55fedbcbf41908e1a9e6a1bef2, type: 2}
   m_storage: {fileID: 491060434}
-  levelCount: 2
+  m_levelCount: 2
 --- !u!4 &339308305
 Transform:
   m_ObjectHideFlags: 0
