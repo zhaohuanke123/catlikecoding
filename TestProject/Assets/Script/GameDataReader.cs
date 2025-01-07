@@ -15,8 +15,8 @@ public class GameDataReader
     /// <param name="version"> 读取的数据版本。 </param>
     public GameDataReader(BinaryReader reader, int version)
     {
-        this.m_reader = reader;
-        this.Version = version;
+        m_reader = reader;
+        Version = version;
     }
 
     #endregion
@@ -81,6 +81,15 @@ public class GameDataReader
         value.b = m_reader.ReadSingle();
         value.a = m_reader.ReadSingle();
         return value;
+    }
+
+    /// <summary>
+    ///  从BinaryReader中读取一个Random.State值。
+    /// </summary>
+    /// <returns> 读取的Random.State值。 </returns>
+    public Random.State ReadRandomState()
+    {
+        return JsonUtility.FromJson<Random.State>(m_reader.ReadString());
     }
 
     #endregion

@@ -43,6 +43,7 @@ public class ShapeFactory : ScriptableObject
             {
                 // 否则实例化一个新的形状
                 instance = Instantiate(m_prefabs[shapeId]);
+                instance.OriginFactory = this;
                 instance.ShapeId = shapeId;
                 SceneManager.MoveGameObjectToScene(instance.gameObject, m_poolScene);
             }
@@ -75,6 +76,12 @@ public class ShapeFactory : ScriptableObject
     /// <param name="shapeToRecycle">需要回收的Shape实例。</param>
     public void Reclaim(Shape shapeToRecycle)
     {
+        if (shapeToRecycle.OriginFactory != this)
+        {
+            Debug.LogError("Tried to reclaim shape with wrong factory.");
+            return;
+        }
+
         if (m_recycle)
         {
             // 1 检查对象池初始化
@@ -135,6 +142,27 @@ public class ShapeFactory : ScriptableObject
 
     #endregion
 
+    #region 属性
+
+    public int FactoryId
+    {
+        get => m_factoryId;
+        set
+        {
+            if (m_factoryId == int.MinValue && value != int.MinValue)
+            {
+                m_factoryId = value;
+            }
+            else
+            {
+                Debug.Log("Not allowed to change factoryId.");
+            }
+        }
+    }
+
+    #endregion
+
+
     #region 字段
 
     /// <summary>
@@ -149,9 +177,6 @@ public class ShapeFactory : ScriptableObject
     [SerializeField]
     private Material[] m_materials;
 
-    /// <summary>
-    /// 存储所有形状实例的对象池。
-    /// </summary>
     private List<Shape>[] m_pools;
 
     /// <summary>
@@ -164,6 +189,12 @@ public class ShapeFactory : ScriptableObject
     /// 池场景来容纳所有可以回收的形状实例。工厂的所有形状都进入这个池，并且永远不应该从中移除。
     /// </summary>
     private Scene m_poolScene;
+
+    /// <summary>
+    ///  工厂ID
+    /// </summary>
+    [System.NonSerialized]
+    private int m_factoryId = int.MinValue;
 
     #endregion
 }

@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+///  用于生成一个立方体内的随机点
+/// </summary>
 public class CubeSpawnZone : SpawnZone
 {
     #region Unity 生命周期

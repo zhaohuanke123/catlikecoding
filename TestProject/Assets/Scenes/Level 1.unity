@@ -261,6 +261,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a4470017d1c40e18bac0186c46ab195, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_spawnConfig:
+    m_factories:
+    - {fileID: 11400000, guid: fbbd30418c750714e8ba902fbcb5c6a7, type: 2}
+    - {fileID: 11400000, guid: fbbd30418c750714e8ba902fbcb5c6a7, type: 2}
+    - {fileID: 11400000, guid: bceb3e55fedbcbf41908e1a9e6a1bef2, type: 2}
+    m_movementDirection: 0
+    m_speed:
+      m_min: 0.55
+      m_max: 1.68
+    m_angularSpeed:
+      m_min: 0
+      m_max: 90
+    m_scale:
+      m_min: 0.73
+      m_max: 2.29
+    m_color:
+      m_hue:
+        m_min: 0
+        m_max: 0.60113424
+      m_saturation:
+        m_min: 0.31285444
+        m_max: 0.76654065
+      m_value:
+        m_min: 0.10869565
+        m_max: 0.7930057
+    m_uniformColor: 0
   m_surfaceOnly: 1
 --- !u!1 &1969764832
 GameObject:
@@ -307,6 +333,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_spawnZone: {fileID: 1752619484}
+  m_persistentObjects: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

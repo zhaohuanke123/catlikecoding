@@ -214,6 +214,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_spawnConfig:
+    m_factories:
+    - {fileID: 11400000, guid: bceb3e55fedbcbf41908e1a9e6a1bef2, type: 2}
+    - {fileID: 11400000, guid: fbbd30418c750714e8ba902fbcb5c6a7, type: 2}
+    - {fileID: 11400000, guid: fbbd30418c750714e8ba902fbcb5c6a7, type: 2}
     m_movementDirection: 0
     m_speed:
       m_min: 2.4
@@ -234,6 +238,7 @@ MonoBehaviour:
       m_value:
         m_min: 0.010396972
         m_max: 0.8005669
+    m_uniformColor: 0
   m_surfaceOnly: 1
 --- !u!1 &1674270188
 GameObject:

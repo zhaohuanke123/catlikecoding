@@ -15,7 +15,7 @@ public class GameDataWriter
     /// <param name="writer">需要包装的BinaryWriter实例。</param>
     public GameDataWriter(BinaryWriter writer)
     {
-        this.m_writer = writer;
+        m_writer = writer;
     }
 
     #endregion
@@ -74,6 +74,15 @@ public class GameDataWriter
         m_writer.Write(value.g);
         m_writer.Write(value.b);
         m_writer.Write(value.a);
+    }
+
+    /// <summary>
+    ///  将一个Random.State类型的值写入到BinaryWriter中。Random.State由多个int值组成。
+    /// </summary>
+    /// <param name="value">需要写入的Random.State值。</param>
+    public void Write(Random.State value)
+    {
+        m_writer.Write(JsonUtility.ToJson(value));
     }
 
     #endregion

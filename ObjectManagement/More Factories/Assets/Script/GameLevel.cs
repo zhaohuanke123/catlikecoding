@@ -34,12 +34,11 @@ public class GameLevel : PersistableObject
     }
 
     /// <summary>
-    ///  配置生成点物体状态，转发调用给SpawnZone
+    /// 生成一个形状, 使用SpawnZone生成 
     /// </summary>
-    /// <param name="shape"> 配置的物体 </param>
-    public void ConfigureSpawn(Shape shape)
+    public Shape SpawnShape()
     {
-        m_spawnZone.ConfigureSpawn(shape);
+        return m_spawnZone.SpawnShape();
     }
 
     #endregion

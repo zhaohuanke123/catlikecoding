@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f996b412d0fd40a090be0aa556f0c148, type: 3}
+  m_Name: Composite Shape Factory
+  m_EditorClassIdentifier: 
+  m_prefabs:
+  - {fileID: 6955363230324435696, guid: 6c668156384576a44912c96cf7a43369, type: 3}
+  - {fileID: 2935251751346337441, guid: 64bb477d7b6a8754daf0c9e09ddffd30, type: 3}
+  - {fileID: 3958819225914029962, guid: b901ac0ec566d59478a765f29c9e5900, type: 3}
+  m_materials:
+  - {fileID: 2100000, guid: 09a2352a63fb3484aaa512ba9fd6b44e, type: 2}
+  - {fileID: 2100000, guid: d56f5ed33db49f24dbba1bc46ce76386, type: 2}
+  - {fileID: 2100000, guid: 9859c7a470ffdb94c9c16dcd6b33abaa, type: 2}
+  m_recycle: 1

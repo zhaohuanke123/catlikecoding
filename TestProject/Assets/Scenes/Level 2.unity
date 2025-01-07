@@ -168,6 +168,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_spawnZone: {fileID: 1469961936}
+  m_persistentObjects: []
 --- !u!1 &1469961934
 GameObject:
   m_ObjectHideFlags: 0
@@ -212,6 +213,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c1b3fa90422466bb121ab9e480f2d1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_spawnConfig:
+    m_factories:
+    - {fileID: 11400000, guid: bceb3e55fedbcbf41908e1a9e6a1bef2, type: 2}
+    - {fileID: 11400000, guid: fbbd30418c750714e8ba902fbcb5c6a7, type: 2}
+    - {fileID: 11400000, guid: fbbd30418c750714e8ba902fbcb5c6a7, type: 2}
+    m_movementDirection: 0
+    m_speed:
+      m_min: 2.4
+      m_max: 3.67
+    m_angularSpeed:
+      m_min: 0.98
+      m_max: 27.88
+    m_scale:
+      m_min: 0.59
+      m_max: 4.71
+    m_color:
+      m_hue:
+        m_min: 0.2079395
+        m_max: 0.8090737
+      m_saturation:
+        m_min: 0.19281663
+        m_max: 0.81663513
+      m_value:
+        m_min: 0.010396972
+        m_max: 0.8005669
+    m_uniformColor: 0
   m_surfaceOnly: 1
 --- !u!1 &1674270188
 GameObject:

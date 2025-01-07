@@ -18,6 +18,12 @@ public enum MovementDirection
 public struct SpawnConfiguration
 {
     /// <summary>
+    ///  生成物体的工厂数组
+    /// </summary>
+    
+    public ShapeFactory[] m_factories;
+
+    /// <summary>
     ///  移动方向
     /// </summary>
     public MovementDirection m_movementDirection;
@@ -41,6 +47,12 @@ public struct SpawnConfiguration
     ///  颜色范围
     /// </summary>
     public ColorRangeHSV m_color;
+
+    /// <summary>
+    ///  组合物体各个部分是否使用相同的颜色
+    /// </summary>
+    
+    public bool m_uniformColor;
 }
 
 
@@ -52,18 +64,30 @@ public abstract class SpawnZone : PersistableObject
     #region 方法
 
     /// <summary>
-    /// 配置每个新的shape 的状态
+    /// 生成一个新的shape
     /// </summary>
-    /// <param name="shape"> 配置的物体A </param>
-    public virtual void ConfigureSpawn(Shape shape)
+    public virtual Shape SpawnShape()
     {
+        int factoryIndex = Random.Range(0, m_spawnConfig.m_factories.Length);
+        Shape shape = m_spawnConfig.m_factories[factoryIndex].GetRandom();
+
         // 1 配置物体的位置旋转缩放 颜色
         Transform t = shape.transform;
         t.localPosition = SpawnPoint;
         t.localRotation = Random.rotation;
         t.localScale = Vector3.one * m_spawnConfig.m_scale.RandomValueInRange;
 
-        shape.SetColor(m_spawnConfig.m_color.RandomInRange);
+        if (m_spawnConfig.m_uniformColor)
+        {
+            shape.SetColor(m_spawnConfig.m_color.RandomInRange);
+        }
+        else
+        {
+            for (int i = 0; i < shape.ColorCount; i++)
+            {
+                shape.SetColor(m_spawnConfig.m_color.RandomInRange, i);
+            }
+        }
 
         // 2.  配置物体的速度和旋转速度
         shape.AngularVelocity = Random.onUnitSphere * m_spawnConfig.m_angularSpeed.RandomValueInRange;
@@ -86,6 +110,7 @@ public abstract class SpawnZone : PersistableObject
         }
 
         shape.Velocity = direction * m_spawnConfig.m_speed.RandomValueInRange;
+        return shape;
     }
 
     #endregion

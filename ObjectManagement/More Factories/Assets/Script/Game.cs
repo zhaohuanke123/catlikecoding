@@ -39,6 +39,18 @@ public class Game : PersistableObject
         StartCoroutine(LoadLevel(DefaultLevelIndex));
     }
 
+
+    private void OnEnable()
+    {
+        if (m_shapeFactories[0].FactoryId != 0)
+        {
+            for (int i = 0; i < m_shapeFactories.Length; i++)
+            {
+                m_shapeFactories[i].FactoryId = i;
+            }
+        }
+    }
+
     private void Update()
     {
         // 1. 检查按键输入
@@ -112,14 +124,7 @@ public class Game : PersistableObject
     /// </summary>
     private void CreateShape()
     {
-        // 1. 获取一个随机shape物体
-        Shape instance = m_shapeFactory.GetRandom();
-        
-        // 2. 配置物体的状态
-        GameLevel.Current.ConfigureSpawn(instance);
-
-        // 3. 将物体添加到物体列表中
-        m_shapes.Add(instance);
+        m_shapes.Add(GameLevel.Current.SpawnShape());
     }
 
     /// <summary>
@@ -140,7 +145,7 @@ public class Game : PersistableObject
         // 3. 销毁所有已存在的物体
         for (int i = 0; i < m_shapes.Count; i++)
         {
-            m_shapeFactory.Reclaim(m_shapes[i]);
+            m_shapes[i].Recycle();
         }
 
         m_shapes.Clear();
@@ -167,6 +172,7 @@ public class Game : PersistableObject
         GameLevel.Current.Save(writer);
         for (int i = 0; i < m_shapes.Count; i++)
         {
+            writer.Write(m_shapes[i].OriginFactory.FactoryId);
             writer.Write(m_shapes[i].ShapeId);
             writer.Write(m_shapes[i].MaterialId);
             m_shapes[i].Save(writer);
@@ -223,9 +229,10 @@ public class Game : PersistableObject
         for (int i = 0; i < count; i++)
         {
             // 实例化新物体并加载其状态
+            int factoryId = version >= 5 ? reader.ReadInt() : 0;
             int shapeId = version > 0 ? reader.ReadInt() : 0;
             int materialId = version > 0 ? reader.ReadInt() : 0;
-            Shape instance = m_shapeFactory.Get(shapeId, materialId);
+            Shape instance = m_shapeFactories[factoryId].Get(shapeId, materialId);
             instance.Load(reader);
             m_shapes.Add(instance);
         }
@@ -239,7 +246,7 @@ public class Game : PersistableObject
         if (m_shapes.Count > 0)
         {
             int index = Random.Range(0, m_shapes.Count);
-            m_shapeFactory.Reclaim(m_shapes[index]);
+            m_shapes[index].Recycle();
             int lastIndex = m_shapes.Count - 1;
             m_shapes[index] = m_shapes[lastIndex];
             m_shapes.RemoveAt(lastIndex);
@@ -313,12 +320,6 @@ public class Game : PersistableObject
     #endregion
 
     /// <summary>
-    ///  形状工厂实例，用于生成形状。
-    /// </summary>
-    [SerializeField]
-    private ShapeFactory m_shapeFactory;
-
-    /// <summary>
     /// 存储当前游戏的物体列表。
     /// </summary>
     private List<Shape> m_shapes;
@@ -342,7 +343,7 @@ public class Game : PersistableObject
     /// <summary>
     ///  游戏数据文件版本
     /// </summary>
-    private const int SaveVersion = 4;
+    private const int SaveVersion = 5;
 
     /// <summary>
     /// 生成物体的进度, 当该值达到 1 时，应该创建一个新的形状
@@ -390,6 +391,12 @@ public class Game : PersistableObject
     /// </summary>
     [SerializeField]
     private Slider m_destructionSpeedSlider;
+
+    /// <summary>
+    /// shape工厂数组
+    /// </summary>
+    [SerializeField]
+    private ShapeFactory[] m_shapeFactories;
 
     #endregion
 }

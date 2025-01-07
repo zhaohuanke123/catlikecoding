@@ -168,6 +168,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_spawnConfig:
+    m_factories: []
     m_movementDirection: 0
     m_speed:
       m_min: 0
@@ -188,6 +189,7 @@ MonoBehaviour:
       m_value:
         m_min: 0
         m_max: 0
+    m_uniformColor: 0
   m_surfaceOnly: 0
 --- !u!1 &513739648
 GameObject:
@@ -270,6 +272,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_spawnConfig:
+    m_factories:
+    - {fileID: 11400000, guid: bceb3e55fedbcbf41908e1a9e6a1bef2, type: 2}
+    - {fileID: 11400000, guid: fbbd30418c750714e8ba902fbcb5c6a7, type: 2}
     m_movementDirection: 0
     m_speed:
       m_min: 6.09
@@ -290,6 +295,7 @@ MonoBehaviour:
       m_value:
         m_min: 0
         m_max: 0.73345935
+    m_uniformColor: 0
   m_spawnZones:
   - {fileID: 456714918}
   - {fileID: 1306425353}
@@ -327,6 +333,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_spawnConfig:
+    m_factories: []
     m_movementDirection: 0
     m_speed:
       m_min: 0
@@ -347,6 +354,7 @@ MonoBehaviour:
       m_value:
         m_min: 0
         m_max: 0
+    m_uniformColor: 0
   m_surfaceOnly: 1
 --- !u!4 &1306425354
 Transform:
@@ -393,6 +401,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_spawnConfig:
+    m_factories: []
     m_movementDirection: 0
     m_speed:
       m_min: 0
@@ -413,6 +422,7 @@ MonoBehaviour:
       m_value:
         m_min: 0
         m_max: 0
+    m_uniformColor: 0
   m_surfaceOnly: 1
 --- !u!4 &1477126526
 Transform:
@@ -474,6 +484,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_spawnConfig:
+    m_factories: []
     m_movementDirection: 0
     m_speed:
       m_min: 0
@@ -494,6 +505,7 @@ MonoBehaviour:
       m_value:
         m_min: 0
         m_max: 0
+    m_uniformColor: 0
   m_surfaceOnly: 0
 --- !u!1 &1621979104
 GameObject:
