@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 /// <summary>
@@ -9,13 +12,55 @@ public class Game : PersistableObject
 {
     #region Unity 生命周期
 
-    private void Awake()
+    /// <summary>
+    /// 在每次禁用组件启用时被调用。在游玩模式下重新编译时，首先禁用所有活动组件，然后保存游戏状态，进行编译，恢复游戏状态，然后重新启用之前活动的组件。
+    /// </summary>
+    private void OnEnable()
     {
+        Instance = this;
+    }
+
+    /// <summary>
+    /// 还有一个 OnDisable 方法，它在重新编译之前被调用。
+    /// </summary>
+    /// <exception cref="NotImplementedException"></exception>
+    // private void OnDisable()
+    // {
+    // }
+
+    // 在 Awake 中尝试太早了，但如果我们稍作延迟并改用 Start 方法，它就能工作。
+    // private void Awake()
+    private void Start()
+    {
+        // 1. 保存单例
+        Instance = this;
+
+        // 2. 化用于存储当前场景中的所有 Shape 实例。
         m_shapes = new List<Shape>();
+
+        // 3. 在编辑器模式下进行特殊场景检查
+        if (Application.isEditor)
+        {
+            // 1. 遍历当前加载的所有场景，寻找名称包含 "Level " 的场景
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                Scene loadedScene = SceneManager.GetSceneAt(i);
+                if (loadedScene.name.Contains("Level "))
+                {
+                    SceneManager.SetActiveScene(loadedScene);
+                    m_loadedLevelBuildIndex = loadedScene.buildIndex;
+                    return;
+                }
+            }
+        }
+
+        // 4. 如果不在编辑器模式或没有找到合适的场景，异步加载默认关卡 1
+        StartCoroutine(LoadLevel(1));
     }
 
     private void Update()
     {
+        // 1. 检查按键输入
         if (Input.GetKeyDown(m_createKey))
         {
             CreateShape();
@@ -28,10 +73,42 @@ public class Game : PersistableObject
         {
             m_storage.Save(this, SaveVersion);
         }
+        else if (Input.GetKeyDown(m_destroyKey))
+        {
+            DestroyShape();
+        }
         else if (Input.GetKeyDown(m_loadKey))
         {
             BeginNewGame();
             m_storage.Load(this);
+        }
+        else
+        {
+            // 检测数字键，加载对应关卡
+            for (int i = 1; i <= m_levelCount; i++)
+            {
+                if (Input.GetKeyDown(KeyCode.Alpha0 + i))
+                {
+                    BeginNewGame();
+                    StartCoroutine(LoadLevel(i));
+                    return;
+                }
+            }
+        }
+
+        // 2. 更新生成和销毁物体的进度
+        m_creationProgress += Time.deltaTime * CreationSpeed;
+        while (m_creationProgress >= 1f)
+        {
+            m_creationProgress -= 1f;
+            CreateShape();
+        }
+
+        m_destructionProgress += Time.deltaTime * DestructionSpeed;
+        while (m_destructionProgress >= 1f)
+        {
+            m_destructionProgress -= 1f;
+            DestroyShape();
         }
     }
 
@@ -49,7 +126,7 @@ public class Game : PersistableObject
 
         // 2. 随机设置物体的位置、旋转和缩放
         Transform t = instance.transform;
-        t.localPosition = Random.insideUnitSphere * 5f;
+        t.localPosition = SpawnZoneOfLevel.SpawnPoint;
         t.localRotation = Random.rotation;
         t.localScale = Vector3.one * Random.Range(0.1f, 1f);
 
@@ -73,7 +150,7 @@ public class Game : PersistableObject
         // 销毁所有已存在的物体
         for (int i = 0; i < m_shapes.Count; i++)
         {
-            Destroy(m_shapes[i].gameObject);
+            m_shapeFactory.Reclaim(m_shapes[i]);
         }
 
         m_shapes.Clear();
@@ -91,6 +168,7 @@ public class Game : PersistableObject
 
         // 写入物体数量和每个物体的状态
         writer.Write(m_shapes.Count);
+        writer.Write(m_loadedLevelBuildIndex);
         for (int i = 0; i < m_shapes.Count; i++)
         {
             writer.Write(m_shapes[i].ShapeId);
@@ -113,8 +191,9 @@ public class Game : PersistableObject
             return;
         }
 
-        // 2. 读取物体数量 (考虑版本差异)
+        // 2. 读取物体数量和切换保存的场景 (考虑版本差异)
         int count = version <= 0 ? -version : reader.ReadInt();
+        StartCoroutine(LoadLevel(version < 2 ? 1 : reader.ReadInt()));
 
         // 3. 读取每个物体的状态
         for (int i = 0; i < count; i++)
@@ -127,6 +206,64 @@ public class Game : PersistableObject
             m_shapes.Add(instance);
         }
     }
+
+    /// <summary>
+    ///  如果物体列表中有物体，则销毁一个物体。
+    /// </summary>
+    private void DestroyShape()
+    {
+        if (m_shapes.Count > 0)
+        {
+            int index = Random.Range(0, m_shapes.Count);
+            m_shapeFactory.Reclaim(m_shapes[index]);
+            int lastIndex = m_shapes.Count - 1;
+            m_shapes[index] = m_shapes[lastIndex];
+            m_shapes.RemoveAt(lastIndex);
+        }
+    }
+
+    private IEnumerator LoadLevel(int levelBuildIndex)
+    {
+        // 1. 防止场景加载中调用Uodate
+        enabled = false;
+
+        // 2. 卸载当前场景
+        if (m_loadedLevelBuildIndex > 0)
+        {
+            yield return SceneManager.UnloadSceneAsync(m_loadedLevelBuildIndex);
+        }
+
+        // 3. 加载新场景
+        yield return SceneManager.LoadSceneAsync(levelBuildIndex, LoadSceneMode.Additive);
+        SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex(levelBuildIndex));
+        m_loadedLevelBuildIndex = levelBuildIndex;
+
+        enabled = true;
+    }
+
+    #endregion
+
+    #region 属性
+
+    /// <summary>
+    /// Game单例
+    /// </summary>
+    public static Game Instance { get; private set; }
+
+    /// <summary>
+    /// 创建速度
+    /// </summary>
+    public float CreationSpeed { get; set; } = 5;
+
+    /// <summary>
+    ///  销毁速度
+    /// </summary>
+    public float DestructionSpeed { get; set; } = 2;
+
+    /// <summary>
+    ///  生成区域引用，由每个关卡的GameLevel实例来设置引用
+    /// </summary>
+    public SpawnZone SpawnZoneOfLevel { get; set; }
 
     #endregion
 
@@ -154,9 +291,18 @@ public class Game : PersistableObject
     /// </summary>
     public KeyCode m_loadKey = KeyCode.L;
 
+    /// <summary>
+    ///  用于销毁物体的按键（默认为X）。
+    /// </summary>
+    public KeyCode m_destroyKey = KeyCode.X;
+
     #endregion
 
-    public ShapeFactory m_shapeFactory;
+    /// <summary>
+    ///  形状工厂实例，用于生成形状。
+    /// </summary>
+    [SerializeField]
+    private ShapeFactory m_shapeFactory;
 
     /// <summary>
     /// 存储当前游戏的物体列表。
@@ -171,7 +317,31 @@ public class Game : PersistableObject
     /// <summary>
     ///  游戏数据文件版本
     /// </summary>
-    private const int SaveVersion = 1;
+    private const int SaveVersion = 2;
+
+    /// <summary>
+    /// 生成物体的进度, 当该值达到 1 时，应该创建一个新的形状
+    /// </summary>
+    private float m_creationProgress;
+
+    /// <summary>
+    ///  销毁物体的进度, 当该值达到 1 时，应该销毁一个形状
+    /// </summary>
+    private float m_destructionProgress;
+
+    #region 关卡相关
+
+    /// <summary>
+    ///  支持的关卡数量
+    /// </summary>
+    public int m_levelCount;
+
+    /// <summary>
+    ///  当前加载的关卡索引
+    /// </summary>
+    private int m_loadedLevelBuildIndex;
+
+    #endregion
 
     #endregion
 }
