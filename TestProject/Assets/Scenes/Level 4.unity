@@ -215,7 +215,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_spawnConfig:
     m_factories: []
-    m_movementDirection: 0
+    m_movementDirection: 2
     m_speed:
       m_min: 0.63
       m_max: 2.42
@@ -236,6 +236,26 @@ MonoBehaviour:
         m_min: 0
         m_max: 0.64650285
     m_uniformColor: 0
+    m_oscillationDirection: 1
+    m_oscillationAmplitude:
+      m_min: 2.03
+      m_max: 5.17
+    m_oscillationFrequency:
+      m_min: 0.72
+      m_max: 1.84
+    m_satellite:
+      m_relativeScale:
+        m_min: 0
+        m_max: 0
+      m_orbitRadius:
+        m_min: 0
+        m_max: 0
+      m_orbitFrequency:
+        m_min: 0
+        m_max: 0
+      m_amount:
+        m_min: 0
+        m_max: 0
   m_surfaceOnly: 0
 --- !u!1 &698364756
 GameObject:
@@ -304,6 +324,26 @@ MonoBehaviour:
         m_min: 0
         m_max: 0.64650285
     m_uniformColor: 0
+    m_oscillationDirection: 1
+    m_oscillationAmplitude:
+      m_min: 0.46
+      m_max: 2.1
+    m_oscillationFrequency:
+      m_min: 0.6
+      m_max: 1.53
+    m_satellite:
+      m_relativeScale:
+        m_min: 0
+        m_max: 0
+      m_orbitRadius:
+        m_min: 0
+        m_max: 0
+      m_orbitFrequency:
+        m_min: 0
+        m_max: 0
+      m_amount:
+        m_min: 0
+        m_max: 0
   m_surfaceOnly: 0
 --- !u!1 &783430982
 GameObject:
@@ -401,7 +441,7 @@ MonoBehaviour:
     m_factories:
     - {fileID: 11400000, guid: bceb3e55fedbcbf41908e1a9e6a1bef2, type: 2}
     - {fileID: 11400000, guid: fbbd30418c750714e8ba902fbcb5c6a7, type: 2}
-    m_movementDirection: 0
+    m_movementDirection: 1
     m_speed:
       m_min: 1.18
       m_max: 3.14
@@ -422,6 +462,26 @@ MonoBehaviour:
         m_min: 0.21172023
         m_max: 0.7032138
     m_uniformColor: 0
+    m_oscillationDirection: 2
+    m_oscillationAmplitude:
+      m_min: 0.18
+      m_max: 2.56
+    m_oscillationFrequency:
+      m_min: 0.63
+      m_max: 0.79
+    m_satellite:
+      m_relativeScale:
+        m_min: 0.18846884
+        m_max: 0.7158791
+      m_orbitRadius:
+        m_min: 1.55
+        m_max: 6.04
+      m_orbitFrequency:
+        m_min: 0.39
+        m_max: 0.72
+      m_amount:
+        m_min: 3
+        m_max: 15
   m_spawnZones:
   - {fileID: 456714918}
   - {fileID: 698364758}
@@ -476,6 +536,7 @@ MonoBehaviour:
   - {fileID: 783430983}
   - {fileID: 85373816}
   - {fileID: 1257718591}
+  m_populationLimit: 10000
 --- !u!1 &1674270188
 GameObject:
   m_ObjectHideFlags: 0

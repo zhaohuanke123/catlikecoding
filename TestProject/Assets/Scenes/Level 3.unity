@@ -169,16 +169,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_spawnConfig:
     m_factories: []
-    m_movementDirection: 0
+    m_movementDirection: 1
     m_speed:
-      m_min: 0
-      m_max: 0
+      m_min: 0.42
+      m_max: 6.81
     m_angularSpeed:
       m_min: 0
-      m_max: 0
+      m_max: 124.46
     m_scale:
-      m_min: 0
-      m_max: 0
+      m_min: 1.77
+      m_max: 3.39
     m_color:
       m_hue:
         m_min: 0
@@ -190,6 +190,26 @@ MonoBehaviour:
         m_min: 0
         m_max: 0
     m_uniformColor: 0
+    m_oscillationDirection: 2
+    m_oscillationAmplitude:
+      m_min: 0.35
+      m_max: 1.43
+    m_oscillationFrequency:
+      m_min: 0.37
+      m_max: 0.85
+    m_satellite:
+      m_relativeScale:
+        m_min: 0
+        m_max: 0
+      m_orbitRadius:
+        m_min: 0
+        m_max: 0
+      m_orbitFrequency:
+        m_min: 0
+        m_max: 0
+      m_amount:
+        m_min: 0
+        m_max: 0
   m_surfaceOnly: 0
 --- !u!1 &513739648
 GameObject:
@@ -275,7 +295,7 @@ MonoBehaviour:
     m_factories:
     - {fileID: 11400000, guid: bceb3e55fedbcbf41908e1a9e6a1bef2, type: 2}
     - {fileID: 11400000, guid: fbbd30418c750714e8ba902fbcb5c6a7, type: 2}
-    m_movementDirection: 0
+    m_movementDirection: 1
     m_speed:
       m_min: 6.09
       m_max: 63.81
@@ -296,6 +316,26 @@ MonoBehaviour:
         m_min: 0
         m_max: 0.73345935
     m_uniformColor: 0
+    m_oscillationDirection: 2
+    m_oscillationAmplitude:
+      m_min: 0.16
+      m_max: 1.56
+    m_oscillationFrequency:
+      m_min: 0.37
+      m_max: 0.9
+    m_satellite:
+      m_relativeScale:
+        m_min: 0.1331758
+        m_max: 0.54829866
+      m_orbitRadius:
+        m_min: 4.21
+        m_max: 5.58
+      m_orbitFrequency:
+        m_min: 0.03
+        m_max: 0.48
+      m_amount:
+        m_min: 5
+        m_max: 24
   m_spawnZones:
   - {fileID: 456714918}
   - {fileID: 1306425353}
@@ -334,16 +374,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_spawnConfig:
     m_factories: []
-    m_movementDirection: 0
+    m_movementDirection: 2
     m_speed:
-      m_min: 0
-      m_max: 0
+      m_min: 1.42
+      m_max: 2.58
     m_angularSpeed:
-      m_min: 0
-      m_max: 0
+      m_min: 0.12
+      m_max: 34.5
     m_scale:
-      m_min: 0
-      m_max: 0
+      m_min: 0.39
+      m_max: 0.67
     m_color:
       m_hue:
         m_min: 0
@@ -355,6 +395,26 @@ MonoBehaviour:
         m_min: 0
         m_max: 0
     m_uniformColor: 0
+    m_oscillationDirection: 3
+    m_oscillationAmplitude:
+      m_min: 1.41
+      m_max: 2.43
+    m_oscillationFrequency:
+      m_min: 0.12
+      m_max: 1.55
+    m_satellite:
+      m_relativeScale:
+        m_min: 0
+        m_max: 0
+      m_orbitRadius:
+        m_min: 0
+        m_max: 0
+      m_orbitFrequency:
+        m_min: 0
+        m_max: 0
+      m_amount:
+        m_min: 0
+        m_max: 0
   m_surfaceOnly: 1
 --- !u!4 &1306425354
 Transform:
@@ -402,16 +462,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_spawnConfig:
     m_factories: []
-    m_movementDirection: 0
+    m_movementDirection: 1
     m_speed:
-      m_min: 0
-      m_max: 0
+      m_min: 1.84
+      m_max: 3.24
     m_angularSpeed:
-      m_min: 0
-      m_max: 0
+      m_min: 1.5
+      m_max: 3.03
     m_scale:
-      m_min: 0
-      m_max: 0
+      m_min: 1.24
+      m_max: 4.16
     m_color:
       m_hue:
         m_min: 0
@@ -423,6 +483,26 @@ MonoBehaviour:
         m_min: 0
         m_max: 0
     m_uniformColor: 0
+    m_oscillationDirection: 2
+    m_oscillationAmplitude:
+      m_min: 1.56
+      m_max: 3.21
+    m_oscillationFrequency:
+      m_min: 0.3
+      m_max: 1.62
+    m_satellite:
+      m_relativeScale:
+        m_min: 0
+        m_max: 0
+      m_orbitRadius:
+        m_min: 0
+        m_max: 0
+      m_orbitFrequency:
+        m_min: 0
+        m_max: 0
+      m_amount:
+        m_min: 0
+        m_max: 0
   m_surfaceOnly: 1
 --- !u!4 &1477126526
 Transform:
@@ -485,16 +565,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_spawnConfig:
     m_factories: []
-    m_movementDirection: 0
+    m_movementDirection: 1
     m_speed:
-      m_min: 0
-      m_max: 0
+      m_min: 0.3
+      m_max: 1.8
     m_angularSpeed:
       m_min: 0
-      m_max: 0
+      m_max: 40.12
     m_scale:
-      m_min: 0
-      m_max: 0
+      m_min: 0.19
+      m_max: 2.55
     m_color:
       m_hue:
         m_min: 0
@@ -506,6 +586,26 @@ MonoBehaviour:
         m_min: 0
         m_max: 0
     m_uniformColor: 0
+    m_oscillationDirection: 2
+    m_oscillationAmplitude:
+      m_min: 0.03
+      m_max: 0.84
+    m_oscillationFrequency:
+      m_min: 0.15
+      m_max: 0.43
+    m_satellite:
+      m_relativeScale:
+        m_min: 0
+        m_max: 0
+      m_orbitRadius:
+        m_min: 0
+        m_max: 0
+      m_orbitFrequency:
+        m_min: 0
+        m_max: 0
+      m_amount:
+        m_min: 0
+        m_max: 0
   m_surfaceOnly: 0
 --- !u!1 &1621979104
 GameObject:
@@ -553,6 +653,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_spawnZone: {fileID: 1257718591}
   m_persistentObjects: []
+  m_populationLimit: 1113
 --- !u!1 &1674270188
 GameObject:
   m_ObjectHideFlags: 0

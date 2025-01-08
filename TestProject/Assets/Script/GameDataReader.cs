@@ -92,6 +92,16 @@ public class GameDataReader
         return JsonUtility.FromJson<Random.State>(m_reader.ReadString());
     }
 
+
+    /// <summary>
+    ///  从BinaryReader中读取一个ShapeInstance值。
+    /// </summary>
+    /// <returns> 读取的ShapeInstance值。 </returns>
+    public ShapeInstance ReadShapeInstance()
+    {
+        return new ShapeInstance(m_reader.ReadInt32());
+    }
+
     #endregion
 
     #region 属性

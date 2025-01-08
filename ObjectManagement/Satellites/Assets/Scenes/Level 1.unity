@@ -289,11 +289,24 @@ MonoBehaviour:
     m_uniformColor: 0
     m_oscillationDirection: 2
     m_oscillationAmplitude:
-      m_min: 0.1
-      m_max: 1
+      m_min: 0
+      m_max: 0
     m_oscillationFrequency:
-      m_min: 1
-      m_max: 1
+      m_min: 0
+      m_max: 0
+    m_satellite:
+      m_relativeScale:
+        m_min: 0.15784499
+        m_max: 0.30075613
+      m_orbitRadius:
+        m_min: 1.47
+        m_max: 3.89
+      m_orbitFrequency:
+        m_min: 0.6
+        m_max: 0.91
+      m_amount:
+        m_min: 3
+        m_max: 7
   m_surfaceOnly: 0
 --- !u!1 &1969764832
 GameObject:
@@ -341,6 +354,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_spawnZone: {fileID: 1752619484}
   m_persistentObjects: []
+  m_populationLimit: 100
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

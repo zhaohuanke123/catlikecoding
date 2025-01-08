@@ -2,6 +2,92 @@
 using UnityEngine;
 
 /// <summary>
+///  Shape 的简介引用
+/// </summary>
+[System.Serializable]
+public struct ShapeInstance
+{
+    #region 构造器
+
+    /// <summary>
+    ///  构造ShapeInstance实例
+    /// </summary>
+    /// <param name="shape"> shape对象 </param>
+    public ShapeInstance(Shape shape)
+    {
+        Shape = shape;
+        m_instanceIdOrSaveIndex = shape.InstanceId;
+    }
+
+    /// <summary>
+    ///  构造ShapeInstance实例
+    /// </summary>
+    /// <param name="saveIndex">  保存的索引 </param>
+    public ShapeInstance(int saveIndex)
+    {
+        Shape = null;
+        m_instanceIdOrSaveIndex = saveIndex;
+    }
+
+    #endregion
+
+    #region 转换方法
+
+    /// <summary>
+    ///  从Shape转换为ShapeInstance
+    ///  通过显示转换实现
+    /// </summary>
+    public static implicit operator ShapeInstance(Shape shape)
+    {
+        return new ShapeInstance(shape);
+    }
+
+    #endregion
+
+    #region 方法
+
+    /// <summary>
+    ///  只在初始化时调用，用于解析Shape引用
+    /// 保存和加载卫星数据现在可以工作了，但是前提是在游戏保存之前没有移除任何形状。
+    /// 如果形状被销毁，形状列表的顺序就会改变，卫星形状的索引可能低于其焦点形状。
+    /// 如果在焦点形状之前加载卫星，则立即检索其焦点的引用是没有意义的。我们必须推迟检索形状，直到所有形状都加载完毕。
+    /// </summary>
+    public void Resolve()
+    {
+        if (m_instanceIdOrSaveIndex >= 0)
+        {
+            Shape = Game.Instance.GetShape(m_instanceIdOrSaveIndex);
+            m_instanceIdOrSaveIndex = Shape.InstanceId;
+        }
+    }
+
+    #endregion
+
+    #region 属性
+
+    /// <summary>
+    ///  实例引用
+    /// </summary>
+    public Shape Shape { get; private set; }
+
+    /// <summary>
+    ///  是否有效，根据实例ID判断
+    /// </summary>
+    public bool IsValid => Shape && m_instanceIdOrSaveIndex == Shape.InstanceId;
+
+    #endregion
+
+    #region 字段
+
+    /// <summary>
+    /// 值为 实例ID 或 保存的索引
+    /// </summary>
+    private int m_instanceIdOrSaveIndex;
+
+    #endregion
+}
+
+/// <summary>
 ///  代表一个可持久化的游戏对象，它能够保存和加载自己的变换（位置、旋转和缩放）, 以及颜色信息，材质信息。
 /// </summary>
 public class Shape : PersistableObject
@@ -164,6 +250,7 @@ public class Shape : PersistableObject
     public void Recycle()
     {
         Age = 0f;
+        InstanceId += 1;
         for (int i = 0; i < m_behaviorList.Count; i++)
         {
             m_behaviorList[i].Recycle();
@@ -174,14 +261,21 @@ public class Shape : PersistableObject
     }
 
     /// <summary>
-    ///  Shape 的更新方法
+    ///  Shape Update方法。
     /// </summary>
+    /// <returns>
+    /// 如果 行为组件有效，则返回 true；否则返回 false 
+    /// </returns>
     public void GameUpdate()
     {
         Age += Time.deltaTime;
         for (int i = 0; i < m_behaviorList.Count; i++)
         {
-            m_behaviorList[i].GameUpdate(this);
+            if (!m_behaviorList[i].GameUpdate(this))
+            {
+                m_behaviorList[i].Recycle();
+                m_behaviorList.RemoveAt(i--);
+            }
         }
     }
 
@@ -216,6 +310,14 @@ public class Shape : PersistableObject
         return null;
     }
 
+    public void ResolveShapeInstances()
+    {
+        for (int i = 0; i < m_behaviorList.Count; i++)
+        {
+            m_behaviorList[i].ResolveShapeInstances();
+        }
+    }
+
     #endregion
 
     #region 属性
@@ -245,6 +347,11 @@ public class Shape : PersistableObject
     public float Age { get; private set; }
 
     /// <summary>
+    ///  shape的实例ID, 初始为0， 每次回收后加1
+    /// </summary>
+    public int InstanceId { get; private set; }
+
+    /// <summary>
     /// 获取物体的材质ID
     /// </summary>
     public int MaterialId { get; private set; }
@@ -254,6 +361,11 @@ public class Shape : PersistableObject
     ///  shape的颜色数量
     /// </summary>
     public int ColorCount => m_colors.Length;
+
+    /// <summary>
+    ///  Game Shape列表的索引来唯一标识形状
+    /// </summary>
+    public int SaveIndex { get; set; }
 
     /// <summary>
     /// 获取和设置原始工厂实例。
