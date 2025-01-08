@@ -218,7 +218,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: bceb3e55fedbcbf41908e1a9e6a1bef2, type: 2}
     - {fileID: 11400000, guid: fbbd30418c750714e8ba902fbcb5c6a7, type: 2}
     - {fileID: 11400000, guid: fbbd30418c750714e8ba902fbcb5c6a7, type: 2}
-    m_movementDirection: 0
+    m_movementDirection: 1
     m_speed:
       m_min: 2.4
       m_max: 3.67
@@ -239,6 +239,13 @@ MonoBehaviour:
         m_min: 0.010396972
         m_max: 0.8005669
     m_uniformColor: 0
+    m_oscillationDirection: 2
+    m_oscillationAmplitude:
+      m_min: 0.13
+      m_max: 1.56
+    m_oscillationFrequency:
+      m_min: 0.42
+      m_max: 1.2
   m_surfaceOnly: 1
 --- !u!1 &1674270188
 GameObject:

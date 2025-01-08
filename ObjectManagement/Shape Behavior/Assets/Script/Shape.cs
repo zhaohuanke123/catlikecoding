@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 ///  代表一个可持久化的游戏对象，它能够保存和加载自己的变换（位置、旋转和缩放）, 以及颜色信息，材质信息。
@@ -10,13 +11,6 @@ public class Shape : PersistableObject
     private void Awake()
     {
         m_colors = new Color[m_meshRenderers.Length];
-    }
-
-
-    public void GameUpdate()
-    {
-        transform.Rotate(AngularVelocity * Time.deltaTime);
-        transform.localPosition += Velocity * Time.deltaTime;
     }
 
     #endregion
@@ -85,8 +79,13 @@ public class Shape : PersistableObject
             writer.Write(m_colors[i]);
         }
 
-        writer.Write(AngularVelocity);
-        writer.Write(Velocity);
+        writer.Write(Age);
+        writer.Write(m_behaviorList.Count);
+        for (int i = 0; i < m_behaviorList.Count; i++)
+        {
+            writer.Write((int)m_behaviorList[i].BehaviorType);
+            m_behaviorList[i].Save(writer);
+        }
     }
 
     /// <summary>
@@ -105,8 +104,23 @@ public class Shape : PersistableObject
             SetColor(reader.Version > 0 ? reader.ReadColor() : Color.white);
         }
 
-        AngularVelocity = reader.Version >= 4 ? reader.ReadVector3() : Vector3.zero;
-        Velocity = reader.Version >= 4 ? reader.ReadVector3() : Vector3.zero;
+        if (reader.Version >= 6)
+        {
+            Age = reader.ReadFloat();
+            int behaviorCount = reader.ReadInt();
+            for (int i = 0; i < behaviorCount; i++)
+            {
+                ShapeBehavior behavior = ((ShapeBehaviorType)reader.ReadInt()).GetInstance();
+                m_behaviorList.Add(behavior);
+                behavior.Load(reader);
+            }
+        }
+        else if (reader.Version >= 4)
+        {
+            AddBehavior<RotationShapeBehavior>().AngularVelocity =
+                reader.ReadVector3();
+            AddBehavior<MovementShapeBehavior>().Velocity = reader.ReadVector3();
+        }
     }
 
     /// <summary>
@@ -144,9 +158,62 @@ public class Shape : PersistableObject
         }
     }
 
+    /// <summary>
+    ///  回收Shape对象，将其放回工厂进行重用。
+    /// </summary>
     public void Recycle()
     {
+        Age = 0f;
+        for (int i = 0; i < m_behaviorList.Count; i++)
+        {
+            m_behaviorList[i].Recycle();
+        }
+
+        m_behaviorList.Clear();
         OriginFactory.Reclaim(this);
+    }
+
+    /// <summary>
+    ///  Shape 的更新方法
+    /// </summary>
+    public void GameUpdate()
+    {
+        Age += Time.deltaTime;
+        for (int i = 0; i < m_behaviorList.Count; i++)
+        {
+            m_behaviorList[i].GameUpdate(this);
+        }
+    }
+
+    /// <summary>
+    ///  添加一个行为到Shape对象上
+    /// </summary>
+    /// <typeparam name="T"> 行为组件类型 </typeparam>
+    /// <returns> 返回添加的行为组件 </returns>
+    public T AddBehavior<T>() where T : ShapeBehavior, new()
+    {
+        T behavior = ShapeBehaviorPool<T>.Get();
+        m_behaviorList.Add(behavior);
+        return behavior;
+    }
+
+    /// <summary>
+    ///  添加一个行为到Shape对象上, 根据行为类型
+    /// </summary>
+    /// <param name="type"> 行为类型 </param>
+    /// <returns> 返回添加的行为组件 </returns>
+    private ShapeBehavior AddBehavior(ShapeBehaviorType type)
+    {
+        switch (type)
+        {
+            case ShapeBehaviorType.Movement:
+                return AddBehavior<MovementShapeBehavior>();
+            case ShapeBehaviorType.Rotation:
+                return AddBehavior<RotationShapeBehavior>();
+        }
+
+        Debug.LogError("Forgot to support " + type);
+        return null;
     }
 
     #endregion
@@ -173,19 +240,15 @@ public class Shape : PersistableObject
     }
 
     /// <summary>
+    ///  通过基于形状的年龄进行振荡
+    /// </summary>
+    public float Age { get; private set; }
+
+    /// <summary>
     /// 获取物体的材质ID
     /// </summary>
     public int MaterialId { get; private set; }
 
-    /// <summary>
-    ///  物体的旋转速度 大小和方向
-    /// </summary>
-    public Vector3 AngularVelocity { get; set; }
-
-    /// <summary>
-    ///  物体的速度
-    /// </summary>
-    public Vector3 Velocity { get; set; }
 
     /// <summary>
     ///  shape的颜色数量
@@ -233,7 +296,6 @@ public class Shape : PersistableObject
     /// <summary>
     /// 可配置的Renderer数组，用于复合Shape
     /// </summary>
-    
     [SerializeField]
     private MeshRenderer[] m_meshRenderers;
 
@@ -256,6 +318,11 @@ public class Shape : PersistableObject
     ///  用于存储Shape的原始工厂实例。实现Shape必须由创建它们的工厂回收
     /// </summary>
     private ShapeFactory m_originFactory;
+
+    /// <summary>
+    ///  shape 的行为列表
+    /// </summary>
+    private List<ShapeBehavior> m_behaviorList = new List<ShapeBehavior>();
 
     #endregion
 }

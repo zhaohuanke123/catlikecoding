@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// 移动方向枚举
@@ -20,7 +21,6 @@ public struct SpawnConfiguration
     /// <summary>
     ///  生成物体的工厂数组
     /// </summary>
-    
     public ShapeFactory[] m_factories;
 
     /// <summary>
@@ -51,8 +51,22 @@ public struct SpawnConfiguration
     /// <summary>
     ///  组合物体各个部分是否使用相同的颜色
     /// </summary>
-    
     public bool m_uniformColor;
+
+    /// <summary>
+    ///  震动方向
+    /// </summary>
+    public MovementDirection m_oscillationDirection;
+
+    /// <summary>
+    ///  震动幅度
+    /// </summary>
+    public FloatRange m_oscillationAmplitude;
+
+    /// <summary>
+    ///  震动频率
+    /// </summary>
+    public FloatRange m_oscillationFrequency;
 }
 
 
@@ -89,28 +103,64 @@ public abstract class SpawnZone : PersistableObject
             }
         }
 
-        // 2.  配置物体的速度和旋转速度
-        shape.AngularVelocity = Random.onUnitSphere * m_spawnConfig.m_angularSpeed.RandomValueInRange;
-
-        Vector3 direction;
-        switch (m_spawnConfig.m_movementDirection)
+        // 2.  添加旋转和移动组件 配置物体的速度和旋转速度
+        float angularSpeed = m_spawnConfig.m_angularSpeed.RandomValueInRange;
+        if (angularSpeed != 0f)
         {
-            case MovementDirection.Upward:
-                direction = transform.up;
-                break;
-            case MovementDirection.Outward:
-                direction = (t.localPosition - transform.position).normalized;
-                break;
-            case MovementDirection.Random:
-                direction = Random.onUnitSphere;
-                break;
-            default:
-                direction = transform.forward;
-                break;
+            var rotation = shape.AddBehavior<RotationShapeBehavior>();
+            rotation.AngularVelocity = Random.onUnitSphere * m_spawnConfig.m_angularSpeed.RandomValueInRange;
         }
 
-        shape.Velocity = direction * m_spawnConfig.m_speed.RandomValueInRange;
+        float speed = m_spawnConfig.m_speed.RandomValueInRange;
+        if (speed != 0f)
+        {
+            var movement = shape.AddBehavior<MovementShapeBehavior>();
+            movement.Velocity = GetDirectionVector(m_spawnConfig.m_movementDirection, t) * speed;
+        }
+
+        // 3. 配置震动组件
+        SetupOscillation(shape);
         return shape;
+    }
+
+    /// <summary>
+    /// 根据配置的枚举获取方向向量。
+    /// </summary>
+    /// <param name="direction">移动方向的枚举类型，定义了方向选项。</param>
+    /// <param name="t">参考对象的变换 (Transform)，用于计算相对方向。</param>
+    /// <returns>返回计算出的方向向量。</returns>
+    private Vector3 GetDirectionVector(MovementDirection direction, Transform t)
+    {
+        switch (direction)
+        {
+            case MovementDirection.Upward:
+                return transform.up;
+            case MovementDirection.Outward:
+                return (t.localPosition - transform.position).normalized;
+            case MovementDirection.Random:
+                return Random.onUnitSphere;
+            default:
+                return transform.forward;
+        }
+    }
+
+    /// <summary>
+    /// 配置震动组件的数据。
+    /// </summary>
+    /// <param name="shape">目标形状对象 (Shape)，用于添加震动行为。</param>
+    private void SetupOscillation(Shape shape)
+    {
+        float amplitude = m_spawnConfig.m_oscillationAmplitude.RandomValueInRange;
+        float frequency = m_spawnConfig.m_oscillationFrequency.RandomValueInRange;
+        if (amplitude == 0f || frequency == 0f)
+        {
+            return;
+        }
+
+        var oscillation = shape.AddBehavior<OscillationShapeBehavior>();
+        oscillation.Offset = GetDirectionVector(m_spawnConfig.m_oscillationDirection, shape.transform) * amplitude;
+        oscillation.Frequency = frequency;
+        Debug.Log(amplitude + " " + frequency);
     }
 
     #endregion

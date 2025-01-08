@@ -195,6 +195,11 @@ public class Game : PersistableObject
         StartCoroutine(LoadGame(reader));
     }
 
+    /// <summary>
+    ///  从GameDataReader中加载物体的状态. 协程方式加载
+    /// </summary>
+    /// <param name="reader">用于读取数据的GameDataReader实例。</param>
+    /// <returns> </returns>
     private IEnumerator LoadGame(GameDataReader reader)
     {
         //  1. 读取存档版本
@@ -253,6 +258,11 @@ public class Game : PersistableObject
         }
     }
 
+    /// <summary>
+    ///  加载关卡, 协程方式加载
+    /// </summary>
+    /// <param name="levelBuildIndex"> 加载的关卡索引  </param>
+    /// <returns></returns>
     private IEnumerator LoadLevel(int levelBuildIndex)
     {
         // 1. 防止场景加载中调用Update
@@ -343,7 +353,7 @@ public class Game : PersistableObject
     /// <summary>
     ///  游戏数据文件版本
     /// </summary>
-    private const int SaveVersion = 5;
+    private const int SaveVersion = 6;
 
     /// <summary>
     /// 生成物体的进度, 当该值达到 1 时，应该创建一个新的形状
