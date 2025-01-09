@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class GameLevel : PersistableObject
 {
@@ -36,9 +37,9 @@ public class GameLevel : PersistableObject
     /// <summary>
     /// 生成一个形状, 使用SpawnZone生成 
     /// </summary>
-    public Shape SpawnShape()
+    public void SpawnShapes()
     {
-        return m_spawnZone.SpawnShape();
+        m_spawnZone.SpawnShapes();
     }
 
     #endregion
@@ -49,6 +50,11 @@ public class GameLevel : PersistableObject
     ///   当前关卡
     /// </summary>
     public static GameLevel Current { get; private set; }
+
+    /// <summary>
+    ///   获取shape 数量限制
+    /// </summary>
+    public int PopulationLimit => m_populationLimit;
 
     #endregion
 
@@ -65,6 +71,9 @@ public class GameLevel : PersistableObject
     /// </summary>
     [SerializeField]
     private PersistableObject[] m_persistentObjects;
+
+    [SerializeField]
+    private int m_populationLimit;
 
     #endregion
 }

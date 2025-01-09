@@ -17,6 +17,8 @@ public class Game : PersistableObject
         // 1. 做初始化 
         m_mainRandomState = Random.state;
         m_shapes = new List<Shape>();
+        m_killList = new List<ShapeInstance>();
+        m_markAsDyingList = new List<ShapeInstance>();
 
         // 2. 在编辑器模式下进行特殊场景检查
         if (Application.isEditor)
@@ -94,11 +96,14 @@ public class Game : PersistableObject
 
     private void FixedUpdate()
     {
+        m_inGameUpdateLoop = true;
         // 1. for循环中驱动shape的Update
         for (int i = 0; i < m_shapes.Count; i++)
         {
             m_shapes[i].GameUpdate();
         }
+
+        m_inGameUpdateLoop = false;
 
         // 2. 更新生成和销毁物体的进度
         m_creationProgress += Time.deltaTime * CreationSpeed;
@@ -115,13 +120,41 @@ public class Game : PersistableObject
             DestroyShape();
         }
 
+        // 3. 超出数量限制时，销毁多余的物体
         int limit = GameLevel.Current.PopulationLimit;
         if (limit > 0)
         {
-            while (m_shapes.Count > limit)
+            while (m_shapes.Count - m_dyingShapeCount > limit)
             {
                 DestroyShape();
             }
+        }
+
+        // 4. 处理待销毁列表
+        if (m_killList.Count > 0)
+        {
+            for (int i = 0; i < m_killList.Count; i++)
+            {
+                if (m_killList[i].IsValid)
+                {
+                    KillImmediately(m_killList[i].Shape);
+                }
+            }
+
+            m_killList.Clear();
+        }
+
+        if (m_markAsDyingList.Count > 0)
+        {
+            for (int i = 0; i < m_markAsDyingList.Count; i++)
+            {
+                if (m_markAsDyingList[i].IsValid)
+                {
+                    MarkAsDyingImmediately(m_markAsDyingList[i].Shape);
+                }
+            }
+
+            m_markAsDyingList.Clear();
         }
     }
 
@@ -151,6 +184,7 @@ public class Game : PersistableObject
         }
 
         m_shapes.Clear();
+        m_dyingShapeCount = 0;
     }
 
     /// <summary>
@@ -243,7 +277,7 @@ public class Game : PersistableObject
             instance.Load(reader);
         }
 
-        // 5. 读取完毕后，我们需要解决所有形状实例的引用。
+        // 5. 读取完毕后，我们需要解决所有shape实例的引用。
         for (int i = 0; i < m_shapes.Count; i++)
         {
             m_shapes[i].ResolveShapeInstances();
@@ -251,18 +285,23 @@ public class Game : PersistableObject
     }
 
     /// <summary>
-    ///  如果物体列表中有物体，则销毁一个物体。
+    /// 销毁场景中的一个shape对象。
+    /// 选择待销毁的shape时会排除正在消亡的shape。若无符合条件的shape，则不执行任何操作。
+    /// 若销毁持续时间（destroyDuration）非正，则立即销毁shape；否则，将添加一个渐消失行为（DyingShapeBehavior）到shape上。
     /// </summary>
     private void DestroyShape()
     {
-        if (m_shapes.Count > 0)
+        if (m_shapes.Count - m_dyingShapeCount > 0)
         {
-            int index = Random.Range(0, m_shapes.Count);
-            m_shapes[index].Recycle();
-            int lastIndex = m_shapes.Count - 1;
-            m_shapes[lastIndex].SaveIndex = index;
-            m_shapes[index] = m_shapes[lastIndex];
-            m_shapes.RemoveAt(lastIndex);
+            Shape shape = m_shapes[Random.Range(m_dyingShapeCount, m_shapes.Count)];
+            if (m_destroyDuration <= 0)
+            {
+                KillImmediately(shape);
+            }
+            else
+            {
+                shape.AddBehavior<DyingShapeBehavior>().Initialize(shape, m_destroyDuration);
+            }
         }
     }
 
@@ -308,6 +347,95 @@ public class Game : PersistableObject
     public Shape GetShape(int index)
     {
         return m_shapes[index];
+    }
+
+    /// <summary>
+    /// 移除指定shape对象。根据当前游戏状态决定立即销毁或加入待销毁列表。
+    /// </summary>
+    /// <param name="shape">待移除的shape实例。</param>
+    public void Kill(Shape shape)
+    {
+        if (m_inGameUpdateLoop)
+        {
+            m_killList.Add(shape);
+        }
+        else
+        {
+            KillImmediately(shape);
+        }
+    }
+
+    /// <summary>
+    /// 立即销毁shape对象，不经过常规的游戏循环处理。
+    /// 此方法直接从游戏世界中移除shape，并更新shape列表，以保持索引的连续性。
+    /// </summary>
+    /// <param name="shape">待立即销毁的shape实例。</param>
+    private void KillImmediately(Shape shape)
+    {
+        // 1. 获取shape的索引
+        int index = shape.SaveIndex;
+        shape.Recycle();
+
+        // 2. 如果shape不是待销魂部分中的最后一个，将其移动到那部分的末尾
+        if (index < m_dyingShapeCount && index < --m_dyingShapeCount)
+        {
+            m_shapes[m_dyingShapeCount].SaveIndex = index;
+            m_shapes[index] = m_shapes[m_dyingShapeCount];
+            index = m_dyingShapeCount;
+        }
+
+        // 3. 将其移动到list的末尾
+        int lastIndex = m_shapes.Count - 1;
+        m_shapes[lastIndex].SaveIndex = index;
+        m_shapes[index] = m_shapes[lastIndex];
+        m_shapes.RemoveAt(lastIndex);
+    }
+
+    /// <summary>
+    /// 立即将shape标记为即将销毁状态，调整shape在列表中的位置以准备回收。
+    /// </summary>
+    /// <param name="shape">待标记的shape实例。</param>
+    private void MarkAsDyingImmediately(Shape shape)
+    {
+        // 1. 如果shape已经在即将销毁的部分中，直接返回
+        int index = shape.SaveIndex;
+        if (index < m_dyingShapeCount)
+        {
+            return;
+        }
+
+        // 2. 将shape移动到即将销毁的部分中
+        m_shapes[m_dyingShapeCount].SaveIndex = index;
+        m_shapes[index] = m_shapes[m_dyingShapeCount];
+        shape.SaveIndex = m_dyingShapeCount;
+        m_shapes[m_dyingShapeCount++] = shape;
+    }
+
+    /// <summary>
+    /// 将shape标记为即将销毁。如果当前处于游戏更新循环中，
+    /// 则将shape添加到待销毁列表以稍后处理；否则立即调用 <see cref="MarkAsDyingImmediately(Shape)"/> 处理。
+    /// </summary>
+    /// <param name="shape">需要被标记为即将销毁的shape实例。</param>
+    public void MarkAsDying(Shape shape)
+    {
+        if (m_inGameUpdateLoop)
+        {
+            m_markAsDyingList.Add(shape);
+        }
+        else
+        {
+            MarkAsDyingImmediately(shape);
+        }
+    }
+
+    /// <summary>
+    /// 判断shape是否已被标记为即将消亡。
+    /// </summary>
+    /// <param name="shape">待检查的shape实例。</param>
+    /// <returns>如果shape已被标记为消亡，则返回true；否则返回false。</returns>
+    public bool IsMarkedAsDying(Shape shape)
+    {
+        return shape.SaveIndex < m_dyingShapeCount;
     }
 
     #endregion
@@ -368,6 +496,17 @@ public class Game : PersistableObject
     private List<Shape> m_shapes;
 
     /// <summary>
+    /// 存储即将或已被销毁的游戏shape对象的列表。
+    /// </summary>
+    private List<ShapeInstance> m_killList;
+
+    /// <summary>
+    /// 用于标记即将销毁的shape实例列表。
+    /// 当shape被标记为待销毁时，它们将被添加到此列表中，并在合适的时机进行处理。
+    /// </summary>
+    private List<ShapeInstance> m_markAsDyingList;
+
+    /// <summary>
     /// 用于保存和加载随机数状态的Random.State实例。
     /// </summary>
     private Random.State m_mainRandomState;
@@ -389,12 +528,12 @@ public class Game : PersistableObject
     private const int SaveVersion = 6;
 
     /// <summary>
-    /// 生成物体的进度, 当该值达到 1 时，应该创建一个新的形状
+    /// 生成物体的进度, 当该值达到 1 时，应该创建一个新的shape
     /// </summary>
     private float m_creationProgress;
 
     /// <summary>
-    ///  销毁物体的进度, 当该值达到 1 时，应该销毁一个形状
+    ///  销毁物体的进度, 当该值达到 1 时，应该销毁一个shape
     /// </summary>
     private float m_destructionProgress;
 
@@ -440,6 +579,22 @@ public class Game : PersistableObject
     /// </summary>
     [SerializeField]
     private ShapeFactory[] m_shapeFactories;
+
+    /// <summary>
+    /// 表示游戏进行中的更新循环标志。
+    /// </summary>
+    private bool m_inGameUpdateLoop;
+
+    /// <summary>
+    /// 当前正在消亡的shape数量。 m_dyingShapeCount 的值所在的下标为非消亡shape部分的第一个。
+    /// </summary>
+    private int m_dyingShapeCount;
+
+    /// <summary>
+    /// 物体销毁持续时间
+    /// </summary>
+    [SerializeField]
+    private float m_destroyDuration;
 
     #endregion
 }

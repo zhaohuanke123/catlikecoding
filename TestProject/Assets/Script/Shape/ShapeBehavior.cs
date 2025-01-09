@@ -7,7 +7,8 @@ public enum ShapeBehaviorType
 {
     Movement,
     Rotation,
-    Oscillation
+    Oscillation,
+    Satellite
 }
 
 /// <summary>
@@ -15,6 +16,11 @@ public enum ShapeBehaviorType
 /// </summary>
 public static class ShapeBehaviorTypeMethods
 {
+    /// <summary>
+    /// 获取与指定的<see cref="ShapeBehaviorType"/>相对应的<see cref="ShapeBehavior"/>实例。
+    /// </summary>
+    /// <param name="type">要获取的形状行为类型。</param>
+    /// <returns>与指定类型对应的<see cref="ShapeBehavior"/>实例，如果类型不被支持则返回null。</returns>
     public static ShapeBehavior GetInstance(this ShapeBehaviorType type)
     {
         switch (type)
@@ -25,9 +31,11 @@ public static class ShapeBehaviorTypeMethods
                 return ShapeBehaviorPool<RotationShapeBehavior>.Get();
             case ShapeBehaviorType.Oscillation:
                 return ShapeBehaviorPool<OscillationShapeBehavior>.Get();
+            case ShapeBehaviorType.Satellite:
+                return ShapeBehaviorPool<SatelliteShapeBehavior>.Get();
         }
 
-        Debug.Log("Forgot to support " + type);
+        Debug.LogError("Forgot to support " + type);
         return null;
     }
 }
@@ -63,7 +71,7 @@ public abstract class ShapeBehavior
     ///  每个形状的行为都有自己的更新方法, 用于更新形状的状态
     /// </summary>
     /// <param name="shape"> 行为组件所属的Shape </param>
-    public abstract void GameUpdate(Shape shape);
+    public abstract bool GameUpdate(Shape shape);
 
     /// <summary>
     /// 每个形状的行为可能都有配置和状态, 我们需要保存它们
@@ -81,6 +89,13 @@ public abstract class ShapeBehavior
     ///  回收行为组件
     /// </summary>
     public abstract void Recycle();
+
+    /// <summary>
+    /// 发出信号，表明现在是时候解析任何形状实例
+    /// </summary>
+    public virtual void ResolveShapeInstances()
+    {
+    }
 
     #endregion
 

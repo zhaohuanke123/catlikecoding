@@ -34,7 +34,7 @@ public class GameLevel : PersistableObject
     }
 
     /// <summary>
-    /// 生成一个形状, 使用SpawnZone生成 
+    /// 生成一个shape, 使用SpawnZone生成 
     /// </summary>
     public void SpawnShapes()
     {

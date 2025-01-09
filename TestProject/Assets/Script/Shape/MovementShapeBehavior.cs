@@ -4,9 +4,10 @@ public sealed class MovementShapeBehavior : ShapeBehavior
 {
     #region 方法
 
-    public override void GameUpdate(Shape shape)
+    public override bool GameUpdate(Shape shape)
     {
         shape.transform.localPosition += Velocity * Time.deltaTime;
+        return true;
     }
 
     public override void Save(GameDataWriter writer)
@@ -28,6 +29,9 @@ public sealed class MovementShapeBehavior : ShapeBehavior
 
     #region 属性
 
+    /// <summary>
+    ///  移动速度
+    /// </summary>
     public Vector3 Velocity { get; set; }
 
     public override ShapeBehaviorType BehaviorType => ShapeBehaviorType.Movement;

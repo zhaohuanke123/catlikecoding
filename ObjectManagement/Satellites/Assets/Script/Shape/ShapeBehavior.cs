@@ -16,6 +16,11 @@ public enum ShapeBehaviorType
 /// </summary>
 public static class ShapeBehaviorTypeMethods
 {
+    /// <summary>
+    /// 获取与指定的<see cref="ShapeBehaviorType"/>相对应的<see cref="ShapeBehavior"/>实例。
+    /// </summary>
+    /// <param name="type">要获取的形状行为类型。</param>
+    /// <returns>与指定类型对应的<see cref="ShapeBehavior"/>实例，如果类型不被支持则返回null。</returns>
     public static ShapeBehavior GetInstance(this ShapeBehaviorType type)
     {
         switch (type)

@@ -445,6 +445,7 @@ MonoBehaviour:
   m_shapeFactories:
   - {fileID: 11400000, guid: bceb3e55fedbcbf41908e1a9e6a1bef2, type: 2}
   - {fileID: 11400000, guid: fbbd30418c750714e8ba902fbcb5c6a7, type: 2}
+  m_destroyDuration: 1
 --- !u!4 &339308305
 Transform:
   m_ObjectHideFlags: 0

@@ -210,6 +210,17 @@ MonoBehaviour:
       m_amount:
         m_min: 0
         m_max: 0
+      m_uniformLifecycles: 0
+    m_lifecycle:
+      m_growingDuration:
+        m_min: 0
+        m_max: 0
+      m_adultDuration:
+        m_min: 0
+        m_max: 0
+      m_dyingDuration:
+        m_min: 0
+        m_max: 0
   m_surfaceOnly: 0
 --- !u!1 &513739648
 GameObject:
@@ -307,14 +318,14 @@ MonoBehaviour:
       m_max: 4.21
     m_color:
       m_hue:
-        m_min: 0.25614372
-        m_max: 0.7514178
+        m_min: 0.5047259
+        m_max: 1
       m_saturation:
-        m_min: 0
-        m_max: 0.8846881
+        m_min: 0.11531192
+        m_max: 1
       m_value:
-        m_min: 0
-        m_max: 0.73345935
+        m_min: 0.26654065
+        m_max: 1
     m_uniformColor: 0
     m_oscillationDirection: 2
     m_oscillationAmplitude:
@@ -336,6 +347,17 @@ MonoBehaviour:
       m_amount:
         m_min: 5
         m_max: 24
+      m_uniformLifecycles: 0
+    m_lifecycle:
+      m_growingDuration:
+        m_min: 0.4059589
+        m_max: 2
+      m_adultDuration:
+        m_min: 0
+        m_max: 70.39106
+      m_dyingDuration:
+        m_min: 0.4878955
+        m_max: 2
   m_spawnZones:
   - {fileID: 456714918}
   - {fileID: 1306425353}
@@ -413,6 +435,17 @@ MonoBehaviour:
         m_min: 0
         m_max: 0
       m_amount:
+        m_min: 0
+        m_max: 0
+      m_uniformLifecycles: 0
+    m_lifecycle:
+      m_growingDuration:
+        m_min: 0
+        m_max: 0
+      m_adultDuration:
+        m_min: 0
+        m_max: 0
+      m_dyingDuration:
         m_min: 0
         m_max: 0
   m_surfaceOnly: 1
@@ -501,6 +534,17 @@ MonoBehaviour:
         m_min: 0
         m_max: 0
       m_amount:
+        m_min: 0
+        m_max: 0
+      m_uniformLifecycles: 0
+    m_lifecycle:
+      m_growingDuration:
+        m_min: 0
+        m_max: 0
+      m_adultDuration:
+        m_min: 0
+        m_max: 0
+      m_dyingDuration:
         m_min: 0
         m_max: 0
   m_surfaceOnly: 1
@@ -604,6 +648,17 @@ MonoBehaviour:
         m_min: 0
         m_max: 0
       m_amount:
+        m_min: 0
+        m_max: 0
+      m_uniformLifecycles: 0
+    m_lifecycle:
+      m_growingDuration:
+        m_min: 0
+        m_max: 0
+      m_adultDuration:
+        m_min: 0
+        m_max: 0
+      m_dyingDuration:
         m_min: 0
         m_max: 0
   m_surfaceOnly: 0

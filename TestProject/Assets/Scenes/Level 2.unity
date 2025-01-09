@@ -169,6 +169,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_spawnZone: {fileID: 1469961936}
   m_persistentObjects: []
+  m_populationLimit: 1252
 --- !u!1 &1469961934
 GameObject:
   m_ObjectHideFlags: 0
@@ -246,6 +247,19 @@ MonoBehaviour:
     m_oscillationFrequency:
       m_min: 0.42
       m_max: 1.2
+    m_satellite:
+      m_relativeScale:
+        m_min: 0.24206054
+        m_max: 0.5482987
+      m_orbitRadius:
+        m_min: 4.48
+        m_max: 6.21
+      m_orbitFrequency:
+        m_min: 0.01
+        m_max: 1.25
+      m_amount:
+        m_min: 6
+        m_max: 11
   m_surfaceOnly: 1
 --- !u!1 &1674270188
 GameObject:

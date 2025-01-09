@@ -2,7 +2,7 @@
 
 
 /// <summary>
-/// 卫星形状行为类，用于模拟卫星围绕焦点的轨道运动。
+/// 卫星shape行为类，用于模拟卫星围绕焦点的轨道运动。
 /// </summary>
 public class SatelliteShapeBehavior : ShapeBehavior
 {
@@ -57,10 +57,10 @@ public class SatelliteShapeBehavior : ShapeBehavior
 
     /// <summary>
     /// 初始化卫星行为。
-    /// 设置卫星围绕焦点形状旋转的轨道参数和初始位置。
+    /// 设置卫星围绕焦点shape旋转的轨道参数和初始位置。
     /// </summary>
-    /// <param name="shape">卫星形状实例。</param>
-    /// <param name="focalShape">焦点形状实例。</param>
+    /// <param name="shape">卫星shape实例。</param>
+    /// <param name="focalShape">焦点shape实例。</param>
     /// <param name="radius">卫星轨道半径。</param>
     public void Initialize(Shape shape, Shape focalShape, float radius, float frequency)
     {
@@ -83,12 +83,12 @@ public class SatelliteShapeBehavior : ShapeBehavior
         m_sinOffset *= radius;
 
         // 3. 为卫星添加旋转行为
-        // 它们的旋转与轨道匹配，因此它们总是以同一面朝向其焦点形状。
+        // 它们的旋转与轨道匹配，因此它们总是以同一面朝向其焦点shape。
         // 使用 InverseTransformDirection 将轨道轴转换为卫星的本地空间。
         shape.AddBehavior<RotationShapeBehavior>().AngularVelocity =
             -360f * frequency * shape.transform.InverseTransformDirection(orbitAxis);
 
-        // 3. 在 Initialize 结束时调用一次 GameUpdate 。这是必要的，因为在形状生成的同一帧中不会调用 GameUpdate 。
+        // 3. 在 Initialize 结束时调用一次 GameUpdate 。这是必要的，因为在shape生成的同一帧中不会调用 GameUpdate 。
         GameUpdate(shape);
 
         // 4. 先前的位置向量是任意的，对于新的行为可能是零，或者仍然包含已回收卫星行为的值。此时卫星尚未移动，因此最初将先前位置设置为其当前位置，在 Initialize 的末尾。
@@ -106,7 +106,7 @@ public class SatelliteShapeBehavior : ShapeBehavior
     #region 字段
 
     /// <summary>
-    /// 焦点形状实例，用于定义轨道中心。
+    /// 焦点shape实例，用于定义轨道中心。
     /// </summary>
     private ShapeInstance m_focalShape;
 

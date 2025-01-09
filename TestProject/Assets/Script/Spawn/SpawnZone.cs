@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 /// <summary>
@@ -10,6 +11,34 @@ public enum MovementDirection
     Upward,
     Outward,
     Random
+}
+
+/// <summary>
+///  卫星配置
+/// </summary>
+[System.Serializable]
+public struct SatelliteConfiguration
+{
+    /// <summary>
+    ///  相对缩放范围 
+    /// </summary>
+    [FloatRangeSlider(0.1f, 1f)]
+    public FloatRange m_relativeScale;
+
+    /// <summary>
+    ///  卫星环绕半径范围   
+    /// </summary>
+    public FloatRange m_orbitRadius;
+
+    /// <summary>
+    ///  卫星环绕频率范围
+    /// </summary>
+    public FloatRange m_orbitFrequency;
+
+    /// <summary>
+    ///  生成数量范围
+    /// </summary>
+    public IntRange m_amount;
 }
 
 /// <summary>
@@ -67,6 +96,11 @@ public struct SpawnConfiguration
     ///  震动频率
     /// </summary>
     public FloatRange m_oscillationFrequency;
+
+    /// <summary>
+    ///  卫星配置
+    /// </summary>
+    public SatelliteConfiguration m_satellite;
 }
 
 
@@ -78,9 +112,9 @@ public abstract class SpawnZone : PersistableObject
     #region 方法
 
     /// <summary>
-    /// 生成一个新的shape
+    /// 生成新的shape, 带卫星
     /// </summary>
-    public virtual Shape SpawnShape()
+    public virtual void SpawnShapes()
     {
         int factoryIndex = Random.Range(0, m_spawnConfig.m_factories.Length);
         Shape shape = m_spawnConfig.m_factories[factoryIndex].GetRandom();
@@ -91,17 +125,7 @@ public abstract class SpawnZone : PersistableObject
         t.localRotation = Random.rotation;
         t.localScale = Vector3.one * m_spawnConfig.m_scale.RandomValueInRange;
 
-        if (m_spawnConfig.m_uniformColor)
-        {
-            shape.SetColor(m_spawnConfig.m_color.RandomInRange);
-        }
-        else
-        {
-            for (int i = 0; i < shape.ColorCount; i++)
-            {
-                shape.SetColor(m_spawnConfig.m_color.RandomInRange, i);
-            }
-        }
+        SetupColor(shape);
 
         // 2.  添加旋转和移动组件 配置物体的速度和旋转速度
         float angularSpeed = m_spawnConfig.m_angularSpeed.RandomValueInRange;
@@ -120,7 +144,11 @@ public abstract class SpawnZone : PersistableObject
 
         // 3. 配置震动组件
         SetupOscillation(shape);
-        return shape;
+        int satelliteCount = m_spawnConfig.m_satellite.m_amount.RandomValueInRange;
+        for (int i = 0; i < satelliteCount; i++)
+        {
+            CreateSatelliteFor(shape);
+        }
     }
 
     /// <summary>
@@ -160,7 +188,48 @@ public abstract class SpawnZone : PersistableObject
         var oscillation = shape.AddBehavior<OscillationShapeBehavior>();
         oscillation.Offset = GetDirectionVector(m_spawnConfig.m_oscillationDirection, shape.transform) * amplitude;
         oscillation.Frequency = frequency;
-        Debug.Log(amplitude + " " + frequency);
+    }
+
+    /// <summary>
+    ///  生成卫星，将围绕焦点Shape运行的形状。
+    /// </summary>
+    /// <param name="focalShape">  焦点Shape </param>
+    private void CreateSatelliteFor(Shape focalShape)
+    {
+        // 1. 生成卫星
+        int factoryIndex = Random.Range(0, m_spawnConfig.m_factories.Length);
+        Shape shape = m_spawnConfig.m_factories[factoryIndex].GetRandom();
+        Transform t = shape.transform;
+
+        // 2. 配置卫星的位置旋转缩放 颜色
+        t.localRotation = Random.rotation;
+        t.localScale = focalShape.transform.localScale * m_spawnConfig.m_satellite.m_relativeScale.RandomValueInRange;
+        SetupColor(shape);
+
+        // 3. 添加卫星行为并初始化
+        shape.AddBehavior<SatelliteShapeBehavior>().Initialize(shape, focalShape,
+            m_spawnConfig.m_satellite.m_orbitRadius.RandomValueInRange,
+            m_spawnConfig.m_satellite.m_orbitFrequency.RandomValueInRange
+        );
+    }
+
+    /// <summary>
+    ///  配置颜色
+    /// </summary>
+    /// <param name="shape"> 需要配置颜色的Shape </param>
+    private void SetupColor(Shape shape)
+    {
+        if (m_spawnConfig.m_uniformColor)
+        {
+            shape.SetColor(m_spawnConfig.m_color.RandomInRange);
+        }
+        else
+        {
+            for (int i = 0; i < shape.ColorCount; i++)
+            {
+                shape.SetColor(m_spawnConfig.m_color.RandomInRange, i);
+            }
+        }
     }
 
     #endregion

@@ -5,6 +5,7 @@ using UnityEngine;
 ///  FloatRange 自定义属性绘制器
 /// </summary>
 [CustomPropertyDrawer(typeof(FloatRange))]
+[CustomPropertyDrawer(typeof(IntRange))]
 public class FloatRangeDrawer : PropertyDrawer
 {
     #region Unity 生命周期

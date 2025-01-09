@@ -234,8 +234,7 @@ public class OrbitCamera : MonoBehaviour
             // 高度的一半可以通过取相机视野角（以弧度为单位）的正切值，并按其近裁剪平面距离缩放来求得。宽度的一半是通过将其按相机的纵横比缩放来得到的。盒子的深度为零。
             Vector3 halfExtends;
             halfExtends.y =
-                m_regularCamera.nearClipPlane *
-                Mathf.Tan(0.5f * Mathf.Deg2Rad * m_regularCamera.fieldOfView);
+                m_regularCamera.nearClipPlane * Mathf.Tan(0.5f * Mathf.Deg2Rad * m_regularCamera.fieldOfView);
             halfExtends.x = halfExtends.y * m_regularCamera.aspect;
             halfExtends.z = 0f;
             return halfExtends;

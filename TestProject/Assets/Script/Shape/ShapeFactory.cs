@@ -57,6 +57,8 @@ public class ShapeFactory : ScriptableObject
 
         // 2. 为实例设置材质
         instance.SetMaterial(m_materials[materialId], materialId);
+
+        Game.Instance.AddShape(instance);
         return instance;
     }
 
@@ -144,6 +146,10 @@ public class ShapeFactory : ScriptableObject
 
     #region 属性
 
+    /// <summary>
+    /// 工厂唯一标识符。
+    /// 此属性用于区分不同的形状工厂实例，通常在管理多个工厂时设定。
+    /// </summary>
     public int FactoryId
     {
         get => m_factoryId;

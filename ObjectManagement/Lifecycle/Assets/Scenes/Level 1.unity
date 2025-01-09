@@ -278,14 +278,14 @@ MonoBehaviour:
       m_max: 2.29
     m_color:
       m_hue:
-        m_min: 0
-        m_max: 0.60113424
+        m_min: 0.39886576
+        m_max: 1
       m_saturation:
-        m_min: 0.31285444
-        m_max: 0.76654065
+        m_min: 0.5463137
+        m_max: 1
       m_value:
-        m_min: 0.10869565
-        m_max: 0.7930057
+        m_min: 0.31568992
+        m_max: 1
     m_uniformColor: 0
     m_oscillationDirection: 2
     m_oscillationAmplitude:
@@ -307,6 +307,17 @@ MonoBehaviour:
       m_amount:
         m_min: 3
         m_max: 7
+      m_uniformLifecycles: 0
+    m_lifecycle:
+      m_growingDuration:
+        m_min: 1
+        m_max: 2
+      m_adultDuration:
+        m_min: 1
+        m_max: 11.331471
+      m_dyingDuration:
+        m_min: 1
+        m_max: 2
   m_surfaceOnly: 0
 --- !u!1 &1969764832
 GameObject:

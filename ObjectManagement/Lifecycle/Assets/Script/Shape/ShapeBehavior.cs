@@ -1,14 +1,17 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// 标识符编号, 用于标识形状的行为
+/// 标识符编号, 用于标识shape的行为
 /// </summary>
 public enum ShapeBehaviorType
 {
     Movement,
     Rotation,
     Oscillation,
-    Satellite
+    Satellite,
+    Growing,
+    Dying,
+    Lifecycle
 }
 
 /// <summary>
@@ -16,6 +19,11 @@ public enum ShapeBehaviorType
 /// </summary>
 public static class ShapeBehaviorTypeMethods
 {
+    /// <summary>
+    /// 根据ShapeBehaviorType获取对应的ShapeBehavior实例
+    /// </summary>
+    /// <param name="type">Shape行为的类型标识</param>
+    /// <returns>与指定类型对应的ShapeBehavior实例，若未支持该类型则返回null并记录错误日志</returns>
     public static ShapeBehavior GetInstance(this ShapeBehaviorType type)
     {
         switch (type)
@@ -28,6 +36,12 @@ public static class ShapeBehaviorTypeMethods
                 return ShapeBehaviorPool<OscillationShapeBehavior>.Get();
             case ShapeBehaviorType.Satellite:
                 return ShapeBehaviorPool<SatelliteShapeBehavior>.Get();
+            case ShapeBehaviorType.Growing:
+                return ShapeBehaviorPool<GrowingShapeBehavior>.Get();
+            case ShapeBehaviorType.Dying:
+                return ShapeBehaviorPool<DyingShapeBehavior>.Get();
+            case ShapeBehaviorType.Lifecycle:
+                return ShapeBehaviorPool<LifecycleShapeBehavior>.Get();
         }
 
         Debug.LogError("Forgot to support " + type);
@@ -36,7 +50,7 @@ public static class ShapeBehaviorTypeMethods
 }
 
 /// <summary>
-///  代表一个形状的行为 抽象基类
+///  代表一个shape的行为 抽象基类
 /// </summary>
 public abstract class ShapeBehavior
 #if UNITY_EDITOR
@@ -63,19 +77,19 @@ public abstract class ShapeBehavior
     #region 方法
 
     /// <summary>
-    ///  每个形状的行为都有自己的更新方法, 用于更新形状的状态
+    ///  每个shape的行为都有自己的更新方法, 用于更新shape的状态
     /// </summary>
     /// <param name="shape"> 行为组件所属的Shape </param>
     public abstract bool GameUpdate(Shape shape);
 
     /// <summary>
-    /// 每个形状的行为可能都有配置和状态, 我们需要保存它们
+    /// 每个shape的行为可能都有配置和状态, 我们需要保存它们
     /// </summary>
     /// <param name="writer">  保存数据的对象 </param>
     public abstract void Save(GameDataWriter writer);
 
     /// <summary>
-    /// 每个形状的行为可能都有配置和状态, 我们需要加载它们
+    /// 每个shape的行为可能都有配置和状态, 我们需要加载它们
     /// </summary>
     /// <param name="reader"> 读取数据的对象 </param>
     public abstract void Load(GameDataReader reader);
@@ -86,7 +100,7 @@ public abstract class ShapeBehavior
     public abstract void Recycle();
 
     /// <summary>
-    /// 发出信号，表明现在是时候解析任何形状实例
+    /// 发出信号，表明现在是时候解析任何shape实例
     /// </summary>
     public virtual void ResolveShapeInstances()
     {

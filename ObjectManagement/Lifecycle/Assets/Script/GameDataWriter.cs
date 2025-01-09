@@ -31,7 +31,6 @@ public class GameDataWriter
         m_writer.Write(value);
     }
 
-
     /// <summary>
     /// 将一个int类型的值写入到BinaryWriter中。
     /// </summary>

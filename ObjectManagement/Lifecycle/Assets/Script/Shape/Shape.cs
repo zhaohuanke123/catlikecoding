@@ -48,9 +48,9 @@ public struct ShapeInstance
 
     /// <summary>
     ///  只在初始化时调用，用于解析Shape引用
-    /// 保存和加载卫星数据现在可以工作了，但是前提是在游戏保存之前没有移除任何形状。
-    /// 如果形状被销毁，形状列表的顺序就会改变，卫星形状的索引可能低于其焦点形状。
-    /// 如果在焦点形状之前加载卫星，则立即检索其焦点的引用是没有意义的。我们必须推迟检索形状，直到所有形状都加载完毕。
+    /// 保存和加载卫星数据现在可以工作了，但是前提是在游戏保存之前没有移除任何shape。
+    /// 如果shape被销毁，shape列表的顺序就会改变，卫星shape的索引可能低于其焦点shape。
+    /// 如果在焦点shape之前加载卫星，则立即检索其焦点的引用是没有意义的。我们必须推迟检索shape，直到所有shape都加载完毕。
     /// </summary>
     public void Resolve()
     {
@@ -125,7 +125,7 @@ public class Shape : PersistableObject
     public void SetColor(Color color)
     {
         // m_color = color;
-        // 设置材质颜色的缺点是这会导致创建新的材质，该材质对于形状是唯一的。每次设置其颜色时都会发生这种情况。
+        // 设置材质颜色的缺点是这会导致创建新的材质，该材质对于shape是唯一的。每次设置其颜色时都会发生这种情况。
         // meshRenderer.material.color = color;
 
         s_sharedPropertyBlock ??= new MaterialPropertyBlock();
@@ -220,7 +220,7 @@ public class Shape : PersistableObject
         // 2. 我们可以安全读取和设置的颜色的最大数量等于已加载或当前计数中的较小值。
         int max = count <= m_colors.Length ? count : m_colors.Length;
 
-        // 3. 读取颜色并将其设置为形状的颜色。
+        // 3. 读取颜色并将其设置为shape的颜色。
         int i = 0;
         for (; i < max; i++)
         {
@@ -318,12 +318,29 @@ public class Shape : PersistableObject
         }
     }
 
+    /// <summary>
+    /// 强制销毁当前shape实例，将其从游戏中移除并进行资源回收。
+    /// </summary>
+    public void Die()
+    {
+        Game.Instance.Kill(this);
+    }
+
+    /// <summary>
+    /// 将当前shape标记为即将销毁。
+    /// 此方法将调用 <see cref="Game.MarkAsDying(Shape)"/> 方法，根据游戏是否处于更新循环中决定立即处理或是延迟处理shape的销毁。
+    /// </summary>
+    public void MarkAsDying()
+    {
+        Game.Instance.MarkAsDying(this);
+    }
+
     #endregion
 
     #region 属性
 
     /// <summary>
-    /// 获取或设置形状的ID。形状的ID一旦设置为有效值后，不能再更改。
+    /// 获取或设置shape的ID。shape的ID一旦设置为有效值后，不能再更改。
     /// </summary>
     public int ShapeId
     {
@@ -342,7 +359,8 @@ public class Shape : PersistableObject
     }
 
     /// <summary>
-    ///  通过基于形状的年龄进行振荡
+    /// age属性，表示该shape对象存在的时间长度（例如，从创建或开始计时起的秒数）。
+    /// 此属性只读，外部不能直接修改，通常用于计算随时间变化的效果。
     /// </summary>
     public float Age { get; private set; }
 
@@ -363,7 +381,8 @@ public class Shape : PersistableObject
     public int ColorCount => m_colors.Length;
 
     /// <summary>
-    ///  Game Shape列表的索引来唯一标识形状
+    /// 保存索引，用于在游戏中唯一标识和保存/加载shape实例的位置。
+    /// 此属性用于在序列化和反序列化过程中快速定位shape实例，
     /// </summary>
     public int SaveIndex { get; set; }
 
@@ -386,22 +405,30 @@ public class Shape : PersistableObject
         }
     }
 
+    /// <summary>
+    /// 指示该shape是否已被标记为即将消亡。
+    /// </summary>
+    /// <value>
+    /// 如果shape已被游戏管理器标记为即将消亡，则返回true；否则返回false。
+    /// </value>
+    public bool IsMarkedAsDying => Game.Instance.IsMarkedAsDying(this);
+
     #endregion
 
     #region 字段
 
     /// <summary>
-    /// 形状的ID, 标识形状的类型
+    /// shape的ID, 标识shape的类型
     /// </summary>
     private int m_shapeId = int.MinValue;
 
     /// <summary>
-    ///  形状的颜色
+    ///  shape的颜色
     /// </summary>
     private Color m_color;
 
     /// <summary>
-    /// 存储MeshRenderer组件的引用，用于修改形状的材质和颜色。
+    /// 存储MeshRenderer组件的引用，用于修改shape的材质和颜色。
     /// </summary>
     private MeshRenderer m_meshRenderer;
 

@@ -12,97 +12,6 @@ public enum MovementDirection
 }
 
 /// <summary>
-///  卫星配置
-/// </summary>
-[System.Serializable]
-public struct SatelliteConfiguration
-{
-    /// <summary>
-    ///  相对缩放范围 
-    /// </summary>
-    [FloatRangeSlider(0.1f, 1f)]
-    public FloatRange m_relativeScale;
-
-    /// <summary>
-    ///  卫星环绕半径范围   
-    /// </summary>
-    public FloatRange m_orbitRadius;
-
-    /// <summary>
-    ///  卫星环绕频率范围
-    /// </summary>
-    public FloatRange m_orbitFrequency;
-
-    /// <summary>
-    ///  生成数量范围
-    /// </summary>
-    public IntRange m_amount;
-}
-
-/// <summary>
-/// 生成点配置
-/// </summary>
-[System.Serializable]
-public struct SpawnConfiguration
-{
-    /// <summary>
-    ///  生成物体的工厂数组
-    /// </summary>
-    public ShapeFactory[] m_factories;
-
-    /// <summary>
-    ///  移动方向
-    /// </summary>
-    public MovementDirection m_movementDirection;
-
-    /// <summary>
-    ///  速度范围
-    /// </summary>
-    public FloatRange m_speed;
-
-    /// <summary>
-    ///  角速度范围
-    /// </summary>
-    public FloatRange m_angularSpeed;
-
-    /// <summary>
-    ///  缩放范围
-    /// </summary>
-    public FloatRange m_scale;
-
-    /// <summary>
-    ///  颜色范围
-    /// </summary>
-    public ColorRangeHSV m_color;
-
-    /// <summary>
-    ///  组合物体各个部分是否使用相同的颜色
-    /// </summary>
-    public bool m_uniformColor;
-
-    /// <summary>
-    ///  震动方向
-    /// </summary>
-    public MovementDirection m_oscillationDirection;
-
-    /// <summary>
-    ///  震动幅度
-    /// </summary>
-    public FloatRange m_oscillationAmplitude;
-
-    /// <summary>
-    ///  震动频率
-    /// </summary>
-    public FloatRange m_oscillationFrequency;
-
-    /// <summary>
-    ///  卫星配置
-    /// </summary>
-    public SatelliteConfiguration m_satellite;
-}
-
-
-/// <summary>
 ///  生成区域 抽象类
 /// </summary>
 public abstract class SpawnZone : PersistableObject
@@ -142,11 +51,24 @@ public abstract class SpawnZone : PersistableObject
 
         // 3. 配置震动组件
         SetupOscillation(shape);
+
+        Vector3 lifecycleDurations = m_spawnConfig.m_lifecycle.RandomDurations;
+
+
+        // 4. 生成卫星
         int satelliteCount = m_spawnConfig.m_satellite.m_amount.RandomValueInRange;
         for (int i = 0; i < satelliteCount; i++)
         {
-            CreateSatelliteFor(shape);
+            CreateSatelliteFor(
+                shape,
+                m_spawnConfig.m_satellite.m_uniformLifecycles
+                    ? lifecycleDurations
+                    : m_spawnConfig.m_lifecycle.RandomDurations
+            );
         }
+
+        // 5. 添加生命周期行为
+        SetupLifecycle(shape, lifecycleDurations);
     }
 
     /// <summary>
@@ -173,7 +95,7 @@ public abstract class SpawnZone : PersistableObject
     /// <summary>
     /// 配置震动组件的数据。
     /// </summary>
-    /// <param name="shape">目标形状对象 (Shape)，用于添加震动行为。</param>
+    /// <param name="shape">目标shape对象 (Shape)，用于添加震动行为。</param>
     private void SetupOscillation(Shape shape)
     {
         float amplitude = m_spawnConfig.m_oscillationAmplitude.RandomValueInRange;
@@ -189,10 +111,11 @@ public abstract class SpawnZone : PersistableObject
     }
 
     /// <summary>
-    ///  生成卫星，将围绕焦点Shape运行的形状。
+    /// 为指定的焦点Shape创建一个卫星Shape，该卫星将在焦点Shape周围运行。
     /// </summary>
-    /// <param name="focalShape">  焦点Shape </param>
-    private void CreateSatelliteFor(Shape focalShape)
+    /// <param name="focalShape">焦点Shape，卫星将围绕这个Shape运行。</param>
+    /// <param name="lifecycleDurations">卫星的生命周期时长范围向量。包含开始和结束时间信息。</param>
+    private void CreateSatelliteFor(Shape focalShape, Vector3 lifecycleDurations)
     {
         // 1. 生成卫星
         int factoryIndex = Random.Range(0, m_spawnConfig.m_factories.Length);
@@ -209,6 +132,9 @@ public abstract class SpawnZone : PersistableObject
             m_spawnConfig.m_satellite.m_orbitRadius.RandomValueInRange,
             m_spawnConfig.m_satellite.m_orbitFrequency.RandomValueInRange
         );
+
+        // 4. 添加生命周期行为
+        SetupLifecycle(shape, lifecycleDurations);
     }
 
     /// <summary>
@@ -227,6 +153,34 @@ public abstract class SpawnZone : PersistableObject
             {
                 shape.SetColor(m_spawnConfig.m_color.RandomInRange, i);
             }
+        }
+    }
+
+    /// <summary>
+    /// 设置shape的生命周期行为，根据给定的持续时间使shape生长或消亡。
+    /// </summary>
+    /// <param name="shape">需要配置生命周期行为的shape实例。</param>
+    /// <param name="durations">一个包含两个元素的向量，分别表示shape变大和变小的持续时间（秒）。</param>
+    private void SetupLifecycle(Shape shape, Vector3 durations)
+    {
+        if (durations.x > 0f)
+        {
+            if (durations.y > 0f || durations.z > 0f)
+            {
+                shape.AddBehavior<LifecycleShapeBehavior>().Initialize(shape, durations.x, durations.y, durations.z);
+            }
+            else
+            {
+                shape.AddBehavior<GrowingShapeBehavior>().Initialize(shape, durations.x);
+            }
+        }
+        else if (durations.y > 0f)
+        {
+            shape.AddBehavior<LifecycleShapeBehavior>().Initialize(shape, durations.x, durations.y, durations.z);
+        }
+        else if (durations.z > 0f)
+        {
+            shape.AddBehavior<DyingShapeBehavior>().Initialize(shape, durations.z);
         }
     }
 

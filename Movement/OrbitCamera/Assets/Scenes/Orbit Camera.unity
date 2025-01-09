@@ -8849,7 +8849,7 @@ MonoBehaviour:
   m_distance: 5
   m_focusRadius: 1
   m_focusCentering: 0.5
-  m_rotationSpeed: 90
+  m_rotationSpeed: 218
   m_minVerticalAngle: -30
   m_maxVerticalAngle: 60
   m_alignDelay: 5

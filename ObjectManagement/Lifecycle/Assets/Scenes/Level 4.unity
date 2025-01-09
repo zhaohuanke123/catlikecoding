@@ -256,6 +256,17 @@ MonoBehaviour:
       m_amount:
         m_min: 0
         m_max: 0
+      m_uniformLifecycles: 0
+    m_lifecycle:
+      m_growingDuration:
+        m_min: 0
+        m_max: 0
+      m_adultDuration:
+        m_min: 0
+        m_max: 0
+      m_dyingDuration:
+        m_min: 0
+        m_max: 0
   m_surfaceOnly: 0
 --- !u!1 &698364756
 GameObject:
@@ -342,6 +353,17 @@ MonoBehaviour:
         m_min: 0
         m_max: 0
       m_amount:
+        m_min: 0
+        m_max: 0
+      m_uniformLifecycles: 0
+    m_lifecycle:
+      m_growingDuration:
+        m_min: 0
+        m_max: 0
+      m_adultDuration:
+        m_min: 0
+        m_max: 0
+      m_dyingDuration:
         m_min: 0
         m_max: 0
   m_surfaceOnly: 0
@@ -453,14 +475,14 @@ MonoBehaviour:
       m_max: 3.88
     m_color:
       m_hue:
-        m_min: 0.13232514
-        m_max: 0.7712666
+        m_min: 0.3610586
+        m_max: 1
       m_saturation:
-        m_min: 0.1852552
-        m_max: 0.6011343
+        m_min: 0.5539703
+        m_max: 0.96984935
       m_value:
-        m_min: 0.21172023
-        m_max: 0.7032138
+        m_min: 0.5085064
+        m_max: 1
     m_uniformColor: 0
     m_oscillationDirection: 2
     m_oscillationAmplitude:
@@ -482,6 +504,17 @@ MonoBehaviour:
       m_amount:
         m_min: 3
         m_max: 15
+      m_uniformLifecycles: 0
+    m_lifecycle:
+      m_growingDuration:
+        m_min: 0.7709496
+        m_max: 2
+      m_adultDuration:
+        m_min: 0
+        m_max: 77.467415
+      m_dyingDuration:
+        m_min: 0.7932961
+        m_max: 2
   m_spawnZones:
   - {fileID: 456714918}
   - {fileID: 698364758}
