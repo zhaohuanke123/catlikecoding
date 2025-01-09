@@ -261,11 +261,8 @@ public class Shape : PersistableObject
     }
 
     /// <summary>
-    ///  Shape Update方法。
+    ///  Shape 的更新方法
     /// </summary>
-    /// <returns>
-    /// 如果 行为组件有效，则返回 true；否则返回 false 
-    /// </returns>
     public void GameUpdate()
     {
         Age += Time.deltaTime;

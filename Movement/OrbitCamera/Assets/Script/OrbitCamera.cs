@@ -182,6 +182,8 @@ public class OrbitCamera : MonoBehaviour
 
         // 3. 平滑调整角度。
         float headingAngle = GetAngle(movement / Mathf.Sqrt(movementDeltaSqr));
+        // Debug.Log(headingAngle);
+        Debug.Log(movement);
         float deltaAbs = Mathf.Abs(Mathf.DeltaAngle(m_orbitAngles.y, headingAngle));
         float rotationChange =
             m_rotationSpeed * Mathf.Min(Time.unscaledDeltaTime, movementDeltaSqr);

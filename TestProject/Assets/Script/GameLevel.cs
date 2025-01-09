@@ -36,9 +36,9 @@ public class GameLevel : PersistableObject
     /// <summary>
     /// 生成一个形状, 使用SpawnZone生成 
     /// </summary>
-    public void SpawnShapes()
+    public Shape SpawnShape()
     {
-        m_spawnZone.SpawnShapes();
+        return m_spawnZone.SpawnShape();
     }
 
     #endregion
@@ -49,11 +49,6 @@ public class GameLevel : PersistableObject
     ///   当前关卡
     /// </summary>
     public static GameLevel Current { get; private set; }
-
-    /// <summary>
-    ///   获取shape 数量限制
-    /// </summary>
-    public int PopulationLimit => m_populationLimit;
 
     #endregion
 
@@ -70,12 +65,6 @@ public class GameLevel : PersistableObject
     /// </summary>
     [SerializeField]
     private PersistableObject[] m_persistentObjects;
-
-    /// <summary>
-    ///  生成的数量限制
-    /// </summary>
-    [SerializeField]
-    private int m_populationLimit;
 
     #endregion
 }

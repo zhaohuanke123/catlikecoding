@@ -4,7 +4,7 @@ public class OscillationShapeBehavior : ShapeBehavior
 {
     #region 方法
 
-    public override bool GameUpdate(Shape shape)
+    public override void GameUpdate(Shape shape)
     {
         // 1. 计算振动
         float oscillation = Mathf.Sin(2f * Mathf.PI * Frequency * shape.Age);
@@ -14,7 +14,6 @@ public class OscillationShapeBehavior : ShapeBehavior
         shape.transform.localPosition += (oscillation - m_previousOscillation) * Offset;
         // 3. 保存上一次的振动值
         m_previousOscillation = oscillation;
-        return true;
     }
 
     public override void Save(GameDataWriter writer)

@@ -57,8 +57,6 @@ public class ShapeFactory : ScriptableObject
 
         // 2. 为实例设置材质
         instance.SetMaterial(m_materials[materialId], materialId);
-
-        Game.Instance.AddShape(instance);
         return instance;
     }
 

@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// 移动方向枚举

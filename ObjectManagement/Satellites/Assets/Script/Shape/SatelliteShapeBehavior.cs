@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 
-
 /// <summary>
-/// 卫星形状行为类，用于模拟卫星围绕焦点的轨道运动。
+///  卫星形状行为
 /// </summary>
 public class SatelliteShapeBehavior : ShapeBehavior
 {
@@ -56,12 +55,12 @@ public class SatelliteShapeBehavior : ShapeBehavior
     }
 
     /// <summary>
-    /// 初始化卫星行为。
-    /// 设置卫星围绕焦点形状旋转的轨道参数和初始位置。
+    ///  初始化卫星行为
     /// </summary>
-    /// <param name="shape">卫星形状实例。</param>
-    /// <param name="focalShape">焦点形状实例。</param>
-    /// <param name="radius">卫星轨道半径。</param>
+    /// <param name="shape"></param>
+    /// <param name="focalShape"></param>
+    /// <param name="radius"></param>
+    /// <param name="frequency"></param>
     public void Initialize(Shape shape, Shape focalShape, float radius, float frequency)
     {
         // 1. 保存卫星的相关信息 
@@ -106,27 +105,27 @@ public class SatelliteShapeBehavior : ShapeBehavior
     #region 字段
 
     /// <summary>
-    /// 焦点形状实例，用于定义轨道中心。
+    ///  
     /// </summary>
     private ShapeInstance m_focalShape;
 
     /// <summary>
-    /// 轨道旋转频率（每秒转动次数）。
+    /// 
     /// </summary>
     private float m_frequency;
 
     /// <summary>
-    /// 用于计算轨道偏移的余弦方向向量。
+    ///   
     /// </summary>
     private Vector3 m_cosOffset;
 
     /// <summary>
-    /// 用于计算轨道偏移的正弦方向向量。
+    /// 
     /// </summary>
     private Vector3 m_sinOffset;
 
     /// <summary>
-    /// 上一帧的位置，用于计算速度。
+    ///  上一次的位置
     /// </summary>
     private Vector3 m_previousPosition;
 

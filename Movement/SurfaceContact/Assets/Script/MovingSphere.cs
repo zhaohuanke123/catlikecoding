@@ -96,6 +96,7 @@ public class MovingSphere : MonoBehaviour
             return;
         }
 
+        m_stepsSinceLastJump = 0;
         m_jumpPhase += 1;
 
         // 2. 根据高度计算跳跃速度
@@ -246,7 +247,7 @@ public class MovingSphere : MonoBehaviour
             return false;
         }
 
-        // 2. 如果碰撞表面的法线与世界坐标系的y轴的点积小于最小允许值，则表示该表面不可作为地面
+        // 2. 碰撞的面的点积小于最大于地面角度点积，即接触面太陡峭了， 则不吸附 
         if (hit.normal.y < GetMinDot(hit.collider.gameObject.layer))
         {
             return false;
@@ -255,11 +256,8 @@ public class MovingSphere : MonoBehaviour
         // 3. 如果射线检测到有效地面，更新地面接触计数器和法线
         m_groundContactCount = 1;
         m_contactNormal = hit.normal;
-
-        // 4. 获取当前速度的大小（速率）
-        // float speed = m_velocity.magnitude;
-
-        // 5. 计算速度与地面法线的点积，如果速度朝着地面法线方向，则需要调整速度
+        
+        // 4. 计算速度与地面法线的点积，如果速度朝着地面法线方向，则需要调整速度
         float dot = Vector3.Dot(m_velocity, hit.normal);
         if (dot > 0f)
         {

@@ -1,13 +1,17 @@
 ﻿using UnityEngine;
 
-public sealed class RotationShapeBehavior : ShapeBehavior
+public sealed class RotationShapeBehavior
+    : ShapeBehavior
 {
+    #region Unity 生命周期
+
+    #endregion
+
     #region 方法
 
-    public override bool GameUpdate(Shape shape)
+    public override void GameUpdate(Shape shape)
     {
         shape.transform.Rotate(AngularVelocity * Time.deltaTime);
-        return true;
     }
 
     public override void Save(GameDataWriter writer)
@@ -27,15 +31,19 @@ public sealed class RotationShapeBehavior : ShapeBehavior
 
     #endregion
 
+    #region 事件
+
+    #endregion
 
     #region 属性
 
-    /// <summary>
-    ///  旋转速度
-    /// </summary>
     public Vector3 AngularVelocity { get; set; }
 
     public override ShapeBehaviorType BehaviorType => ShapeBehaviorType.Rotation;
+
+    #endregion
+
+    #region 字段
 
     #endregion
 }

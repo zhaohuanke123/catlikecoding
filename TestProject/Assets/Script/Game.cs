@@ -42,7 +42,6 @@ public class Game : PersistableObject
 
     private void OnEnable()
     {
-        Instance = this;
         if (m_shapeFactories[0].FactoryId != 0)
         {
             for (int i = 0; i < m_shapeFactories.Length; i++)
@@ -57,7 +56,7 @@ public class Game : PersistableObject
         // 1. 检查按键输入
         if (Input.GetKeyDown(m_createKey))
         {
-            GameLevel.Current.SpawnShapes();
+            CreateShape();
         }
         else if (Input.GetKeyDown(m_newGameKey))
         {
@@ -105,7 +104,7 @@ public class Game : PersistableObject
         while (m_creationProgress >= 1f)
         {
             m_creationProgress -= 1f;
-            GameLevel.Current.SpawnShapes();
+            CreateShape();
         }
 
         m_destructionProgress += Time.deltaTime * DestructionSpeed;
@@ -114,20 +113,19 @@ public class Game : PersistableObject
             m_destructionProgress -= 1f;
             DestroyShape();
         }
-
-        int limit = GameLevel.Current.PopulationLimit;
-        if (limit > 0)
-        {
-            while (m_shapes.Count > limit)
-            {
-                DestroyShape();
-            }
-        }
     }
 
     #endregion
 
     #region 方法
+
+    /// <summary>
+    /// 创建一个物体
+    /// </summary>
+    private void CreateShape()
+    {
+        m_shapes.Add(GameLevel.Current.SpawnShape());
+    }
 
     /// <summary>
     ///  开始新游戏， 重置游戏状态
@@ -241,12 +239,7 @@ public class Game : PersistableObject
             int materialId = version > 0 ? reader.ReadInt() : 0;
             Shape instance = m_shapeFactories[factoryId].Get(shapeId, materialId);
             instance.Load(reader);
-        }
-
-        // 5. 读取完毕后，我们需要解决所有形状实例的引用。
-        for (int i = 0; i < m_shapes.Count; i++)
-        {
-            m_shapes[i].ResolveShapeInstances();
+            m_shapes.Add(instance);
         }
     }
 
@@ -260,7 +253,6 @@ public class Game : PersistableObject
             int index = Random.Range(0, m_shapes.Count);
             m_shapes[index].Recycle();
             int lastIndex = m_shapes.Count - 1;
-            m_shapes[lastIndex].SaveIndex = index;
             m_shapes[index] = m_shapes[lastIndex];
             m_shapes.RemoveAt(lastIndex);
         }
@@ -290,26 +282,6 @@ public class Game : PersistableObject
         enabled = true;
     }
 
-    /// <summary>
-    ///  添加一个物体到物体列表中
-    /// </summary>
-    /// <param name="shape">  要添加的物体 </param>
-    public void AddShape(Shape shape)
-    {
-        shape.SaveIndex = m_shapes.Count;
-        m_shapes.Add(shape);
-    }
-
-    /// <summary>
-    ///  从物体列表中获取一个物体
-    /// </summary>
-    /// <param name="index"> 物体索引 </param>
-    /// <returns> 物体实例 </returns>
-    public Shape GetShape(int index)
-    {
-        return m_shapes[index];
-    }
-
     #endregion
 
     #region 属性
@@ -323,11 +295,6 @@ public class Game : PersistableObject
     ///  销毁速度
     /// </summary>
     public float DestructionSpeed { get; set; } = 2;
-
-    /// <summary>
-    ///  获取Game单例
-    /// </summary>
-    public static Game Instance { get; private set; }
 
     #endregion
 

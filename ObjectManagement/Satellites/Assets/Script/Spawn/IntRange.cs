@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 ///  用于生成随机值的整形范围

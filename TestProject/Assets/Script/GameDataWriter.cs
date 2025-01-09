@@ -78,20 +78,11 @@ public class GameDataWriter
 
     /// <summary>
     ///  将一个Random.State类型的值写入到BinaryWriter中。Random.State由多个int值组成。
-    /// 使用JsonUtility.ToJson将Random.State转换为字符串，然后将字符串写入到BinaryWriter中。
     /// </summary>
     /// <param name="value">需要写入的Random.State值。</param>
     public void Write(Random.State value)
     {
         m_writer.Write(JsonUtility.ToJson(value));
-    }
-
-    /// <summary>
-    ///  将一个ShapeInstance类型的值写入到BinaryWriter中。
-    /// </summary>
-    public void Write(ShapeInstance value)
-    {
-        m_writer.Write(value.IsValid ? value.Shape.SaveIndex : -1);
     }
 
     #endregion

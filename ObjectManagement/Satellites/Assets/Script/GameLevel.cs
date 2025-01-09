@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class GameLevel : PersistableObject
 {
@@ -71,9 +72,6 @@ public class GameLevel : PersistableObject
     [SerializeField]
     private PersistableObject[] m_persistentObjects;
 
-    /// <summary>
-    ///  生成的数量限制
-    /// </summary>
     [SerializeField]
     private int m_populationLimit;
 
