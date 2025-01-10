@@ -133,7 +133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 456714917}
   - component: {fileID: 456714918}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Sphere Zone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -221,6 +221,7 @@ MonoBehaviour:
       m_dyingDuration:
         m_min: 0
         m_max: 0
+  m_spawnSpeed: 0
   m_surfaceOnly: 0
 --- !u!1 &513739648
 GameObject:
@@ -268,7 +269,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1257718590}
   - component: {fileID: 1257718591}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: 'Spawn Zones '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -358,6 +359,7 @@ MonoBehaviour:
       m_dyingDuration:
         m_min: 0.4878955
         m_max: 2
+  m_spawnSpeed: 0
   m_spawnZones:
   - {fileID: 456714918}
   - {fileID: 1306425353}
@@ -375,7 +377,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1306425354}
   - component: {fileID: 1306425353}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Sphere Zone  Surface Only
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -448,6 +450,7 @@ MonoBehaviour:
       m_dyingDuration:
         m_min: 0
         m_max: 0
+  m_spawnSpeed: 0
   m_surfaceOnly: 1
 --- !u!4 &1306425354
 Transform:
@@ -474,7 +477,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1477126526}
   - component: {fileID: 1477126525}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Cube Zone Surface Only
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -547,6 +550,7 @@ MonoBehaviour:
       m_dyingDuration:
         m_min: 0
         m_max: 0
+  m_spawnSpeed: 0
   m_surfaceOnly: 1
 --- !u!4 &1477126526
 Transform:
@@ -573,7 +577,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1506597821}
   - component: {fileID: 1506597822}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Cube Zone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -661,6 +665,7 @@ MonoBehaviour:
       m_dyingDuration:
         m_min: 0
         m_max: 0
+  m_spawnSpeed: 0
   m_surfaceOnly: 0
 --- !u!1 &1621979104
 GameObject:
@@ -707,7 +712,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_spawnZone: {fileID: 1257718591}
-  m_persistentObjects: []
+  levelObjects:
+  - {fileID: 1257718591}
+  - {fileID: 456714918}
+  - {fileID: 1306425353}
+  - {fileID: 1506597822}
+  - {fileID: 1477126525}
   m_populationLimit: 1113
 --- !u!1 &1674270188
 GameObject:

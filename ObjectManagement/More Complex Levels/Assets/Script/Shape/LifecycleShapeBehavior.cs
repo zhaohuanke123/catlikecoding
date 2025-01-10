@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// 生命周期形状行为类，用于控制形状对象从成年到衰亡的各个阶段。
+/// 生命周期shape行为类，用于控制shape对象从成年到衰亡的各个阶段。
 /// </summary>
 public class LifecycleShapeBehavior : ShapeBehavior
 {
@@ -51,13 +51,13 @@ public class LifecycleShapeBehavior : ShapeBehavior
     }
 
     /// <summary>
-    /// 初始化形状的行为以控制其生命周期的不同阶段。
-    /// 此方法设置了形状的成年、衰减持续时间，并根据需要添加了<see cref="GrowingShapeBehavior"/>。
+    /// 初始化shape的行为以控制其生命周期的不同阶段。
+    /// 此方法设置了shape的成年、衰减持续时间，并根据需要添加了<see cref="GrowingShapeBehavior"/>。
     /// </summary>
-    /// <param name="shape">形状实例，该行为将应用于这个形状。</param>
-    /// <param name="growingDuration">成长阶段的持续时间。如果大于0，则会为形状添加成长行为。</param>
-    /// <param name="adultDuration">成年阶段的持续时间。指定了形状维持成熟状态的时长。</param>
-    /// <param name="dyingDuration">衰减阶段的持续时间。定义了形状在标记为死亡后，直至消失的持续时间。</param>
+    /// <param name="shape">shape实例，该行为将应用于这个shape。</param>
+    /// <param name="growingDuration">成长阶段的持续时间。如果大于0，则会为shape添加成长行为。</param>
+    /// <param name="adultDuration">成年阶段的持续时间。指定了shape维持成熟状态的时长。</param>
+    /// <param name="dyingDuration">衰减阶段的持续时间。定义了shape在标记为死亡后，直至消失的持续时间。</param>
     public void Initialize(Shape shape, float growingDuration, float adultDuration, float dyingDuration)
     {
         // 1. 保存组件数据

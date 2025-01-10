@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Composite Shape Factory
   m_EditorClassIdentifier: 
   m_prefabs:
-  - {fileID: 6955363230324435696, guid: 6c668156384576a44912c96cf7a43369, type: 3}
+  - {fileID: 506087655594966893, guid: 91cf3900b7dbd0043a25fdb4f39dc437, type: 3}
   - {fileID: 2935251751346337441, guid: 64bb477d7b6a8754daf0c9e09ddffd30, type: 3}
   - {fileID: 3958819225914029962, guid: b901ac0ec566d59478a765f29c9e5900, type: 3}
   m_materials:

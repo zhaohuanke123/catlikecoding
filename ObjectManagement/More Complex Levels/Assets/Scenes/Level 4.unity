@@ -179,7 +179,7 @@ GameObject:
   m_Component:
   - component: {fileID: 456714917}
   - component: {fileID: 456714918}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Sphere Zone A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -267,7 +267,117 @@ MonoBehaviour:
       m_dyingDuration:
         m_min: 0
         m_max: 0
+  m_spawnSpeed: 0
   m_surfaceOnly: 0
+--- !u!1 &485556823
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 485556824}
+  - component: {fileID: 485556826}
+  - component: {fileID: 485556825}
+  - component: {fileID: 485556828}
+  - component: {fileID: 485556827}
+  m_Layer: 9
+  m_Name: Kill B
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &485556824
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 485556823}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.2339356, y: 6.93, z: -0.02}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &485556825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 485556823}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b125baee607f4650b9ce5464c39d9adf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_dyingDuration: 1
+--- !u!114 &485556826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 485556823}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9e0170797314a58ba2345fc20e3e98a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_angularVelocity: {x: 0, y: 90, z: 0}
+--- !u!65 &485556827
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 485556823}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 21.88, y: 20.91, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!54 &485556828
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 485556823}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &698364756
 GameObject:
   m_ObjectHideFlags: 0
@@ -278,7 +388,7 @@ GameObject:
   m_Component:
   - component: {fileID: 698364757}
   - component: {fileID: 698364758}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Sphere Zone B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -366,6 +476,7 @@ MonoBehaviour:
       m_dyingDuration:
         m_min: 0
         m_max: 0
+  m_spawnSpeed: 0
   m_surfaceOnly: 0
 --- !u!1 &783430982
 GameObject:
@@ -413,6 +524,115 @@ Transform:
   - {fileID: 85373815}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &786137852
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 786137857}
+  - component: {fileID: 786137856}
+  - component: {fileID: 786137855}
+  - component: {fileID: 786137853}
+  - component: {fileID: 786137858}
+  m_Layer: 9
+  m_Name: Live B
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &786137853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786137852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b04783fbe9f4aa288241afa20542dfc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_dyingDuration: 1
+--- !u!54 &786137855
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786137852}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &786137856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786137852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9e0170797314a58ba2345fc20e3e98a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_angularVelocity: {x: 0, y: 90, z: 0}
+--- !u!4 &786137857
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786137852}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.2339356, y: 6.93, z: -0.02}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &786137858
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786137852}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 21.26
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1257718589
 GameObject:
   m_ObjectHideFlags: 0
@@ -423,7 +643,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1257718590}
   - component: {fileID: 1257718591}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Compsite Spawn Zone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -515,6 +735,7 @@ MonoBehaviour:
       m_dyingDuration:
         m_min: 0.7932961
         m_max: 2
+  m_spawnSpeed: 5
   m_spawnZones:
   - {fileID: 456714918}
   - {fileID: 698364758}
@@ -565,11 +786,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_spawnZone: {fileID: 1257718591}
-  m_persistentObjects:
-  - {fileID: 783430983}
-  - {fileID: 85373816}
+  levelObjects:
   - {fileID: 1257718591}
-  m_populationLimit: 10000
+  - {fileID: 456714918}
+  - {fileID: 698364758}
+  - {fileID: 485556826}
+  m_populationLimit: 0
 --- !u!1 &1674270188
 GameObject:
   m_ObjectHideFlags: 0
@@ -671,3 +893,5 @@ SceneRoots:
   - {fileID: 1621979105}
   - {fileID: 1674270190}
   - {fileID: 783430984}
+  - {fileID: 485556824}
+  - {fileID: 786137857}

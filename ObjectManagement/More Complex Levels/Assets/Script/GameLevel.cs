@@ -1,26 +1,34 @@
 ﻿using System;
 using UnityEngine;
 
-public class GameLevel : PersistableObject
+public partial class GameLevel : PersistableObject
 {
     #region Unity 生命周期
 
     private void OnEnable()
     {
         Current = this;
-        m_persistentObjects ??= Array.Empty<PersistableObject>();
+        levelObjects ??= Array.Empty<GameLevelObject>();
     }
 
     #endregion
 
     #region 方法
 
+    public void GameUpdate()
+    {
+        for (int i = 0; i < levelObjects.Length; i++)
+        {
+            levelObjects[i].GameUpdate();
+        }
+    }
+
     public override void Save(GameDataWriter writer)
     {
-        writer.Write(m_persistentObjects.Length);
-        for (int i = 0; i < m_persistentObjects.Length; i++)
+        writer.Write(levelObjects.Length);
+        for (int i = 0; i < levelObjects.Length; i++)
         {
-            m_persistentObjects[i].Save(writer);
+            levelObjects[i].Save(writer);
         }
     }
 
@@ -29,7 +37,7 @@ public class GameLevel : PersistableObject
         int savedCount = reader.ReadInt();
         for (int i = 0; i < savedCount; i++)
         {
-            m_persistentObjects[i].Load(reader);
+            levelObjects[i].Load(reader);
         }
     }
 
@@ -69,7 +77,7 @@ public class GameLevel : PersistableObject
     ///  用于保存关卡时哪些对象应该被持久化
     /// </summary>
     [SerializeField]
-    private PersistableObject[] m_persistentObjects;
+    private GameLevelObject[] levelObjects;
 
     /// <summary>
     ///  生成的数量限制

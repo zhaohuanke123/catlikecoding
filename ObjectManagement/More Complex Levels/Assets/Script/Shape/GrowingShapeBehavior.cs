@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// 成长行为类，用于控制形状对象随时间逐渐增大的行为。
+/// 成长行为类，用于控制shape对象随时间逐渐增大的行为。
 /// </summary>
 public class GrowingShapeBehavior : ShapeBehavior
 {

@@ -1,6 +1,4 @@
-﻿using UnityEngine.Serialization;
-
-/// <summary>
+﻿/// <summary>
 /// 生成点配置
 /// </summary>
 [System.Serializable]

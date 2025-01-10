@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 
 /// <summary>
-///  用于旋转物体
+/// 旋转对象类，用于在游戏中实现物体的持续旋转功能。
 /// </summary>
-public class RotatingObject : PersistableObject
+public class RotatingObject : GameLevelObject
 {
-    #region Unity 生命周期
+    #region 方法
 
-    private void FixedUpdate()
+    public override void GameUpdate()
     {
         transform.Rotate(m_angularVelocity * Time.deltaTime);
     }

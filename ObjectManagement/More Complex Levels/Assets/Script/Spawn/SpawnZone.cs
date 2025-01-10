@@ -14,9 +14,33 @@ public enum MovementDirection
 /// <summary>
 ///  生成区域 抽象类
 /// </summary>
-public abstract class SpawnZone : PersistableObject
+public abstract class SpawnZone : GameLevelObject
 {
     #region 方法
+
+    public override void GameUpdate()
+    {
+        m_spawnProgress += Time.deltaTime * m_spawnSpeed;
+        while (m_spawnProgress >= 1f)
+        {
+            m_spawnProgress -= 1f;
+            SpawnShapes();
+        }
+    }
+
+    #endregion
+
+    #region 方法
+
+    public override void Save(GameDataWriter writer)
+    {
+        writer.Write(m_spawnProgress);
+    }
+
+    public override void Load(GameDataReader reader)
+    {
+        m_spawnProgress = reader.ReadFloat();
+    }
 
     /// <summary>
     /// 生成新的shape, 带卫星
@@ -25,6 +49,7 @@ public abstract class SpawnZone : PersistableObject
     {
         int factoryIndex = Random.Range(0, m_spawnConfig.m_factories.Length);
         Shape shape = m_spawnConfig.m_factories[factoryIndex].GetRandom();
+        shape.gameObject.layer = gameObject.layer;
 
         // 1 配置物体的位置旋转缩放 颜色
         Transform t = shape.transform;
@@ -120,6 +145,7 @@ public abstract class SpawnZone : PersistableObject
         // 1. 生成卫星
         int factoryIndex = Random.Range(0, m_spawnConfig.m_factories.Length);
         Shape shape = m_spawnConfig.m_factories[factoryIndex].GetRandom();
+        shape.gameObject.layer = gameObject.layer;
         Transform t = shape.transform;
 
         // 2. 配置卫星的位置旋转缩放 颜色
@@ -202,6 +228,18 @@ public abstract class SpawnZone : PersistableObject
     /// </summary>
     [SerializeField]
     private SpawnConfiguration m_spawnConfig;
+
+    /// <summary>
+    /// 表示生成新shape的速度。
+    /// </summary>
+    [SerializeField]
+    [Range(0f, 50f)]
+    private float m_spawnSpeed;
+
+    /// <summary>
+    /// 表示生成进度，用于跟踪自上次生成新的形状以来的时间积累。
+    /// </summary>
+    private float m_spawnProgress;
 
     #endregion
 }

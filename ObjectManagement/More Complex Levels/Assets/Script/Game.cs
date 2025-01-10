@@ -103,6 +103,7 @@ public class Game : PersistableObject
             m_shapes[i].GameUpdate();
         }
 
+        GameLevel.Current.GameUpdate();
         m_inGameUpdateLoop = false;
 
         // 2. 更新生成和销毁物体的进度
@@ -525,7 +526,7 @@ public class Game : PersistableObject
     /// <summary>
     ///  游戏数据文件版本
     /// </summary>
-    private const int SaveVersion = 6;
+    private const int SaveVersion = 7;
 
     /// <summary>
     /// 生成物体的进度, 当该值达到 1 时，应该创建一个新的shape
