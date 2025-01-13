@@ -6,6 +6,30 @@
 [System.Serializable]
 public struct FloatRange
 {
+    #region 构造器
+
+    /// <summary>
+    /// 构造一个固定值的范围
+    /// </summary>
+    /// <param name="value">生成的固定值</param>
+    public FloatRange(float value)
+    {
+        m_min = m_max = value;
+    }
+
+    /// <summary>
+    /// 构造一个范围 
+    /// </summary>
+    /// <param name="min">最小值</param>
+    /// <param name="max">最大值</param>
+    public FloatRange(float min, float max)
+    {
+        m_min = min;
+        m_max = max < min ? min : max;
+    }
+
+    #endregion
+
     #region 属性
 
     /// <summary>

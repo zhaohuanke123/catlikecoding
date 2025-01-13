@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 [CreateAssetMenu]
-public class GameTileContentFactory : ScriptableObject
+public class GameTileContentFactory : GameObjectFactory
 {
     #region 方法
 
@@ -25,12 +25,11 @@ public class GameTileContentFactory : ScriptableObject
     private GameTileContent Get(GameTileContent prefab)
     {
         // 1. 实例化预设体
-        GameTileContent instance = Instantiate(prefab);
+        GameTileContent instance = CreateGameObjectInstance(prefab);
         // 2. 设置来源工厂
         instance.OriginFactory = this;
 
         // 3. 移动到工厂场景
-        MoveToFactoryScene(instance.gameObject);
         return instance;
     }
 
@@ -46,37 +45,11 @@ public class GameTileContentFactory : ScriptableObject
             case GameTileContentType.Destination: return Get(m_destinationPrefab);
             case GameTileContentType.Empty: return Get(m_emptyPrefab);
             case GameTileContentType.Wall: return Get(m_wallPrefab);
+            case GameTileContentType.SpawnPoint: return Get(m_spawnPointPrefab);
         }
 
         Debug.Assert(false, "Unsupported type: " + type);
         return null;
-    }
-
-    /// <summary>
-    /// 将指定的游戏对象移动到工厂场景中。
-    /// 此方法用于管理对象池，将不再当前场景中使用的 GameTileContent
-    /// 实例移动到一个专门的场景中，以便后续重用，减少资源消耗。
-    /// </summary>
-    /// <param name="o">需要移动到工厂场景的游戏对象。</param>
-    private void MoveToFactoryScene(GameObject o)
-    {
-        if (!m_contentScene.isLoaded)
-        {
-            if (Application.isEditor)
-            {
-                m_contentScene = SceneManager.GetSceneByName(name);
-                if (!m_contentScene.isLoaded)
-                {
-                    m_contentScene = SceneManager.CreateScene(name);
-                }
-            }
-            else
-            {
-                m_contentScene = SceneManager.CreateScene(name);
-            }
-        }
-
-        SceneManager.MoveGameObjectToScene(o, m_contentScene);
     }
 
     #endregion
@@ -105,6 +78,12 @@ public class GameTileContentFactory : ScriptableObject
     /// </summary>
     [SerializeField]
     private GameTileContent m_wallPrefab = default;
+
+    /// <summary>
+    /// 预制体实例，代表游戏中的Enemy出生点。
+    /// </summary>
+    [SerializeField]
+    private GameTileContent m_spawnPointPrefab = default;
 
     #endregion
 }

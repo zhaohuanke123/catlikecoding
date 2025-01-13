@@ -170,7 +170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ground: {fileID: 1848041488}
   m_tilePrefab: {fileID: 5315651721818593214, guid: 80838b86d891e4149b35d4231810b267, type: 3}
-  gridTexture: {fileID: 2800000, guid: e3fa61576ced55f4aad2fd55ee22ecf1, type: 3}
+  m_gridTexture: {fileID: 2800000, guid: e3fa61576ced55f4aad2fd55ee22ecf1, type: 3}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -510,6 +510,8 @@ MonoBehaviour:
   m_boardSize: {x: 11, y: 11}
   m_board: {fileID: 299201437}
   m_tileContentFactory: {fileID: 11400000, guid: fffd763ded578a745969536d268822ed, type: 2}
+  enemyFactory: {fileID: 11400000, guid: cb5cb1b4f1a67cf43ae6cec785fafa49, type: 2}
+  spawnSpeed: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

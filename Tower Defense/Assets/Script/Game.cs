@@ -29,6 +29,15 @@ public class Game : MonoBehaviour
         {
             m_board.ShowGrid = !m_board.ShowGrid;
         }
+
+        m_spawnProgress += m_spawnSpeed * Time.deltaTime;
+        while (m_spawnProgress >= 1f)
+        {
+            m_spawnProgress -= 1f;
+            SpawnEnemy();
+        }
+
+        m_enemies.GameUpdate();
     }
 
     /// <summary>
@@ -74,16 +83,33 @@ public class Game : MonoBehaviour
     }
 
     /// <summary>
-    /// 根据触屏或鼠标点击位置找到对应的游戏棋盘方块，
-    /// 然后切换该方块的目的地（Destination）状态。
+    /// 处理替代触摸输入事件，主要关注鼠标右键操作。
     /// </summary>
     private void HandleAlternativeTouch()
     {
+        // 1. 获取触碰位置对应的格子
         GameTile tile = m_board.GetTile(TouchRay);
         if (tile != null)
         {
-            m_board.ToggleDestination(tile);
+            // 2. 切换生成点或者目标点
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                m_board.ToggleDestination(tile);
+            }
+            else
+            {
+                m_board.ToggleSpawnPoint(tile);
+            }
         }
+    }
+
+    private void SpawnEnemy()
+    {
+        GameTile spawnPoint = m_board.GetSpawnPoint(Random.Range(0, m_board.SpawnPointCount));
+        Enemy enemy = m_enemyFactory.Get();
+        enemy.SpawnOn(spawnPoint);
+
+        m_enemies.Add(enemy);
     }
 
     #endregion
@@ -117,6 +143,29 @@ public class Game : MonoBehaviour
     /// </summary>
     [SerializeField]
     private GameTileContentFactory m_tileContentFactory = default;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SerializeField]
+    private EnemyFactory m_enemyFactory = default;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SerializeField]
+    [Range(0.1f, 10f)]
+    private float m_spawnSpeed = 1f;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private float m_spawnProgress;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private EnemyCollection m_enemies = new EnemyCollection();
 
     #endregion
 }

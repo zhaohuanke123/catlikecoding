@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Serialization;
 
+
 /// <summary>
 /// 表示游戏中的每个方块
 /// </summary>
@@ -59,6 +60,7 @@ public class GameTile : MonoBehaviour
         // 1. 清除路径信息
         m_distance = 0;
         m_nextOnPath = null;
+        ExitPoint = transform.localPosition;
     }
 
     /// <summary>
@@ -67,7 +69,7 @@ public class GameTile : MonoBehaviour
     /// </summary>
     /// <param name="neighbor">尝试延伸路径到达的相邻GameTile对象。</param>
     /// <returns>成功延伸路径后的相邻GameTile，如果无法延伸则返回null。</returns>
-    private GameTile GrowPathTo(GameTile neighbor)
+    private GameTile GrowPathTo(GameTile neighbor, Direction direction)
     {
         Debug.Assert(HasPath, "No path!");
 
@@ -80,6 +82,12 @@ public class GameTile : MonoBehaviour
         // 2. 更新相邻方块的路径信息
         neighbor.m_distance = m_distance + 1;
         neighbor.m_nextOnPath = this;
+
+        // 3. 设置出口点
+        neighbor.ExitPoint = neighbor.transform.localPosition + direction.GetHalfVector();
+
+        // 4. 设置路径方向
+        neighbor.PathDirection = direction;
         return neighbor.Content.Type != GameTileContentType.Wall ? neighbor : null;
     }
 
@@ -87,27 +95,27 @@ public class GameTile : MonoBehaviour
     /// 向北扩展当前路径。
     /// </summary>
     /// <returns>返回向北相邻的路径上的GameTile对象，如果无法向北扩展则返回null。</returns>
-    public GameTile GrowPathNorth() => GrowPathTo(m_north);
+    public GameTile GrowPathNorth() => GrowPathTo(m_north, Direction.South);
 
     /// <summary>
     /// 从当前GameTile向东尝试扩展路径至相邻的GameTile。
     /// 如果东方的相邻方块为空或者已有路径，则不执行任何操作并返回null。否则，更新该相邻方块的路径信息，并返回该方块。
     /// </summary>
     /// <returns>成功扩展路径后的东方GameTile对象，或null（如果无法扩展）。</returns>
-    public GameTile GrowPathEast() => GrowPathTo(m_east);
+    public GameTile GrowPathEast() => GrowPathTo(m_east, Direction.West);
 
     /// <summary>
     /// 尝试从当前GameTile向南扩展路径至相邻的GameTile。
     /// </summary>
     /// <returns>如果成功延伸路径到南方的相邻GameTile，则返回该方块；否则返回null。</returns>
-    public GameTile GrowPathSouth() => GrowPathTo(m_south);
+    public GameTile GrowPathSouth() => GrowPathTo(m_south, Direction.North);
 
     /// <summary>
     /// 尝试从当前GameTile向西扩展路径至相邻的GameTile。
     /// 如果西侧相邻方块为空或已有路径，则返回null。否则，更新该方块的路径信息并返回该方块。
     /// </summary>
     /// <returns>成功延伸路径后的西侧相邻GameTile，如果无法延伸则返回null。</returns>
-    public GameTile GrowPathWest() => GrowPathTo(m_west);
+    public GameTile GrowPathWest() => GrowPathTo(m_west, Direction.East);
 
     /// <summary>
     /// 显示当前GameTile对象在路径上的箭头指示。
@@ -186,6 +194,22 @@ public class GameTile : MonoBehaviour
             m_content.transform.localPosition = transform.localPosition;
         }
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public GameTile NextTileOnPath => m_nextOnPath;
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public Vector3 ExitPoint { get; private set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public Direction PathDirection { get; private set; }
 
     #endregion
 

@@ -15,11 +15,12 @@ public class GameBoard : MonoBehaviour
     /// 初始化游戏棋盘，根据给定的尺寸创建并布局游戏方块。
     /// </summary>
     /// <param name="size">棋盘的尺寸，一个包含宽度（x轴）和高度（y轴）的二维整数向量。</param>
+    /// <param name="contentFactory"> 游戏方块内容工厂，用于创建和管理不同类型的GameTileContent对象。 </param>
     public void Initialize(Vector2Int size, GameTileContentFactory contentFactory)
     {
         // 1. 保存棋盘尺寸 设置地面的缩放
         m_size = size;
-        this.m_contentFactory = contentFactory;
+        m_contentFactory = contentFactory;
         m_ground.localScale = new Vector3(size.x, size.y, 1f);
 
         // 2. 计算距离中心点的偏移量
@@ -62,6 +63,9 @@ public class GameBoard : MonoBehaviour
 
         // 3. 设置终点
         ToggleDestination(m_tiles[m_tiles.Length / 2]);
+
+        // 4. 设置怪物生成点
+        ToggleSpawnPoint(m_tiles[0]);
     }
 
     /// <summary>
@@ -217,7 +221,33 @@ public class GameBoard : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="tile"></param>
+    public void ToggleSpawnPoint(GameTile tile)
+    {
+        if (tile.Content.Type == GameTileContentType.SpawnPoint)
+        {
+            if (m_spawnPoints.Count > 1)
+            {
+                m_spawnPoints.Remove(tile);
+                tile.Content = m_contentFactory.Get(GameTileContentType.Empty);
+            }
+        }
+        else if (tile.Content.Type == GameTileContentType.Empty)
+        {
+            tile.Content = m_contentFactory.Get(GameTileContentType.SpawnPoint);
+            m_spawnPoints.Add(tile);
+        }
+    }
+
     #endregion
+
+    public GameTile GetSpawnPoint(int index)
+    {
+        return m_spawnPoints[index];
+    }
 
     #region 属性
 
@@ -277,6 +307,11 @@ public class GameBoard : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// 怪物生成点的数量。
+    /// </summary>
+    public int SpawnPointCount => m_spawnPoints.Count;
 
     #endregion
 
@@ -342,6 +377,12 @@ public class GameBoard : MonoBehaviour
     /// 主纹理的Shader属性ID。用于在运行时通过脚本访问材质的主纹理属性。
     /// </summary>
     private static readonly int MainTexID = Shader.PropertyToID("_MainTex");
+
+
+    /// <summary>
+    /// 存储游戏中的怪物生成点列表。
+    /// </summary>
+    private List<GameTile> m_spawnPoints = new List<GameTile>();
 
     #endregion
 }

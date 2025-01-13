@@ -14,6 +14,8 @@ public class FloatRangeSliderDrawer : PropertyDrawer
         // 1. 开始绘制该属性，并传入矩形区域、标签和属性
         EditorGUI.BeginProperty(position, label, property);
 
+        position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
+        
         // 2. 获取 min 和 max 属性
         SerializedProperty minProperty = property.FindPropertyRelative("m_min");
         SerializedProperty maxProperty = property.FindPropertyRelative("m_max");
