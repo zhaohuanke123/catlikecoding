@@ -225,22 +225,31 @@ public class GameBoard : MonoBehaviour
     }
 
     /// <summary>
-    /// 切换游戏方块上的Tower状态。如果方块当前是空的，则添加一个Tower；如果方块已有Tower，则移除Tower并尝试重新计算路径。
+    /// 
     /// </summary>
     /// <param name="tile">要进行Tower状态切换的游戏方块实例。</param>
-    public void ToggleTower(GameTile tile)
+    /// <param name="towerType"></param>
+    public void ToggleTower(GameTile tile, TowerType towerType)
     {
         // 1. 切换Tower 状态
         if (tile.Content.Type == GameTileContentType.Tower)
         {
             m_updatingContent.Remove(tile.Content);
-            tile.Content = m_contentFactory.Get(GameTileContentType.Empty);
-            FindPaths();
+            if (((Tower)tile.Content).TowerType == towerType)
+            {
+                tile.Content = m_contentFactory.Get(GameTileContentType.Empty);
+                FindPaths();
+            }
+            else
+            {
+                tile.Content = m_contentFactory.Get(towerType);
+                m_updatingContent.Add(tile.Content);
+            }
         }
         else if (tile.Content.Type == GameTileContentType.Empty)
         {
             // 2. 如果是Empty，设置为Tower
-            tile.Content = m_contentFactory.Get(GameTileContentType.Tower);
+            tile.Content = m_contentFactory.Get(towerType);
 
             // 3. 确保有一条路径
             if (FindPaths())
@@ -256,7 +265,7 @@ public class GameBoard : MonoBehaviour
         // 4. 如果是Wall，直接替换为Tower，不需要重新计算路径
         else if (tile.Content.Type == GameTileContentType.Wall)
         {
-            tile.Content = m_contentFactory.Get(GameTileContentType.Tower);
+            tile.Content = m_contentFactory.Get(towerType);
             m_updatingContent.Add(tile.Content);
         }
     }

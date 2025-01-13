@@ -45,11 +45,40 @@ public class GameTileContentFactory : GameObjectFactory
             case GameTileContentType.Empty: return Get(m_emptyPrefab);
             case GameTileContentType.Wall: return Get(m_wallPrefab);
             case GameTileContentType.SpawnPoint: return Get(m_spawnPointPrefab);
-            case GameTileContentType.Tower: return Get(m_towerPrefab);
         }
 
         Debug.Assert(false, "Unsupported type: " + type);
         return null;
+    }
+
+    /// <summary>
+    /// 根据给定的炮塔类型获取对应的炮塔预置体实例。
+    /// </summary>
+    /// <param name="type">要获取的炮塔类型。</param>
+    /// <returns>与指定类型对应的炮塔实例。</returns>
+    public Tower Get(TowerType type)
+    {
+        Debug.Assert((int)type < m_towerPrefabs.Length, "Unsupported tower type!");
+
+        Tower prefab = m_towerPrefabs[(int)type];
+
+        Debug.Assert(type == prefab.TowerType, "Tower prefab at wrong index!");
+
+        return Get(prefab);
+    }
+
+    /// <summary>
+    /// 根据给定的游戏格子内容类型，获取一个新的游戏格子内容实例。
+    /// 此方法通过工厂模式确保实例化过程符合预期，并处理类型与预制体之间的映射关系。
+    /// </summary>
+    ///  <typeparam name="T">所需游戏格子内容的类型。</typeparam>
+    /// <param name="prefab"> 要获取的游戏格子内容预制体实例。</param>
+    /// <returns>与指定类型对应的新创建的游戏格子内容实例。</returns>
+    private T Get<T>(T prefab) where T : GameTileContent
+    {
+        T instance = CreateGameObjectInstance(prefab);
+        instance.OriginFactory = this;
+        return instance;
     }
 
     #endregion
@@ -89,7 +118,7 @@ public class GameTileContentFactory : GameObjectFactory
     /// 预制体实例，代表游戏中可构建的Tower。
     /// </summary>
     [SerializeField]
-    private Tower m_towerPrefab = default;
+    private Tower[] m_towerPrefabs = default;
 
     #endregion
 }

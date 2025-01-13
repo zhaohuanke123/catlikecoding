@@ -19,20 +19,17 @@ public class TargetPoint : MonoBehaviour
 
     #endregion
 
-    #region 方法
-
-    #endregion
-
-
     #region 属性
 
+    /// <summary>
+    ///  Enemy对象引用，表示当前TargetPoint所属的Enemy对象。
+    /// </summary>
     public Enemy Enemy { get; private set; }
 
+    /// <summary>
+    ///  获取当前TargetPoint的位置。
+    /// </summary>
     public Vector3 Position => transform.position;
-
-    #endregion
-
-    #region 字段
 
     #endregion
 }

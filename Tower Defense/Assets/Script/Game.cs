@@ -32,6 +32,15 @@ public class Game : MonoBehaviour
             m_board.ShowGrid = !m_board.ShowGrid;
         }
 
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            m_selectedTowerType = TowerType.Laser;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            m_selectedTowerType = TowerType.Mortar;
+        }
+
         m_spawnProgress += m_spawnSpeed * Time.deltaTime;
         while (m_spawnProgress >= 1f)
         {
@@ -92,7 +101,7 @@ public class Game : MonoBehaviour
             // 2. 切换塔或者墙
             if (Input.GetKey(KeyCode.LeftShift))
             {
-                m_board.ToggleTower(tile);
+                m_board.ToggleTower(tile, m_selectedTowerType);
             }
             else
             {
@@ -188,6 +197,8 @@ public class Game : MonoBehaviour
     /// 存储并管理游戏中所有Enemy的集合。
     /// </summary>
     private EnemyCollection m_enemies = new EnemyCollection();
+
+    private TowerType m_selectedTowerType;
 
     #endregion
 }
