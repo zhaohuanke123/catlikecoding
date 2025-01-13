@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 // 游戏棋盘，用于可视化 
 public class GameBoard : MonoBehaviour

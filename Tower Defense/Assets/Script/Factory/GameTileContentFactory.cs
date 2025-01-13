@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 [CreateAssetMenu]
 public class GameTileContentFactory : GameObjectFactory

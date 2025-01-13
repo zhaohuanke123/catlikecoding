@@ -3,12 +3,11 @@
 [System.Serializable]
 public class EnemyCollection
 {
-    #region Unity 生命周期
-
-    #endregion
-
     #region 方法
 
+    /// <summary>
+    ///  更新当前游戏中所有敌人的状态。
+    /// </summary>
     public void GameUpdate()
     {
         for (int i = 0; i < m_enemies.Count; i++)
@@ -23,6 +22,10 @@ public class EnemyCollection
         }
     }
 
+    /// <summary>
+    /// 向敌人类别集合中添加一个新的敌人实例。
+    /// </summary>
+    /// <param name="enemy">要添加到集合中的敌人实例。</param>
     public void Add(Enemy enemy)
     {
         m_enemies.Add(enemy);
@@ -30,16 +33,11 @@ public class EnemyCollection
 
     #endregion
 
-    #region 事件
-
-    #endregion
-
-    #region 属性
-
-    #endregion
-
     #region 字段
 
+    /// <summary>
+    /// 用于存储当前游戏中所有的敌人实例。 
+    /// </summary>
     private List<Enemy> m_enemies = new List<Enemy>();
 
     #endregion

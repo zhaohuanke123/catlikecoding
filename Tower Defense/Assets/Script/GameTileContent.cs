@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Serialization;
 
 /// <summary>
 /// 游戏格子内容基类，用于表示游戏地图上每个格子可变化的内容，如地面、障碍物或目标点等。

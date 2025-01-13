@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Serialization;
 
 /// <summary>
 /// Enemy对象工厂，继承自GameObjectFactory，用于创建和回收Enemy实例。

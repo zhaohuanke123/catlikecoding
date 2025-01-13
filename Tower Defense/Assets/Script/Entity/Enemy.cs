@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Serialization;
 
 public class Enemy : MonoBehaviour
 {
@@ -107,7 +106,6 @@ public class Enemy : MonoBehaviour
         transform.localRotation = m_direction.GetRotation();
         m_directionAngleTo = m_direction.GetAngle();
         m_model.localPosition = new Vector3(m_pathOffset, 0);
-        m_progressFactor = 1f;
         m_progressFactor = m_speed;
     }
 
@@ -139,7 +137,7 @@ public class Enemy : MonoBehaviour
     /// </summary>
     private void PrepareTurnAround()
     {
-        m_directionAngleTo = m_directionAngleFrom + 180f + (m_pathOffset < 0f ? 180f : -180f);
+        m_directionAngleTo = m_directionAngleFrom  + (m_pathOffset < 0f ? 180f : -180f);
         m_model.localPosition = new Vector3(m_pathOffset, 0f);
         m_progressFactor = m_speed / (Mathf.PI * Mathf.Max(Mathf.Abs(m_pathOffset), 0.2f));
     }
@@ -230,7 +228,6 @@ public class Enemy : MonoBehaviour
     /// <summary>
     /// Enemy模型的Transform组件，用于在场景中表示Enemy的显示层
     /// </summary>
-    [FormerlySerializedAs("model")]
     [SerializeField]
     private Transform m_model = default;
 
