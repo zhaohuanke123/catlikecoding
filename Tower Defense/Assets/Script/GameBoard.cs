@@ -4,11 +4,15 @@ using UnityEngine;
 // 游戏棋盘，用于可视化 
 public class GameBoard : MonoBehaviour
 {
-    #region Unity 生命周期
-
-    #endregion
-
     #region 方法
+
+    public void GameUpdate()
+    {
+        for (int i = 0; i < m_updatingContent.Count; i++)
+        {
+            m_updatingContent[i].GameUpdate();
+        }
+    }
 
     /// <summary>
     /// 初始化游戏棋盘，根据给定的尺寸创建并布局游戏方块。
@@ -150,7 +154,7 @@ public class GameBoard : MonoBehaviour
     public GameTile GetTile(Ray ray)
     {
         //  1. 射线检测
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        if (Physics.Raycast(ray, out RaycastHit hit, float.MaxValue, 1))
         {
             // 2. 计算射线命中的方块索引
             int x = (int)(hit.point.x + m_size.x * 0.5f);
@@ -217,6 +221,43 @@ public class GameBoard : MonoBehaviour
                 tile.Content = m_contentFactory.Get(GameTileContentType.Empty);
                 FindPaths();
             }
+        }
+    }
+
+    /// <summary>
+    /// 切换游戏方块上的Tower状态。如果方块当前是空的，则添加一个Tower；如果方块已有Tower，则移除Tower并尝试重新计算路径。
+    /// </summary>
+    /// <param name="tile">要进行Tower状态切换的游戏方块实例。</param>
+    public void ToggleTower(GameTile tile)
+    {
+        // 1. 切换Tower 状态
+        if (tile.Content.Type == GameTileContentType.Tower)
+        {
+            m_updatingContent.Remove(tile.Content);
+            tile.Content = m_contentFactory.Get(GameTileContentType.Empty);
+            FindPaths();
+        }
+        else if (tile.Content.Type == GameTileContentType.Empty)
+        {
+            // 2. 如果是Empty，设置为Tower
+            tile.Content = m_contentFactory.Get(GameTileContentType.Tower);
+
+            // 3. 确保有一条路径
+            if (FindPaths())
+            {
+                m_updatingContent.Add(tile.Content);
+            }
+            else
+            {
+                tile.Content = m_contentFactory.Get(GameTileContentType.Empty);
+                FindPaths();
+            }
+        }
+        // 4. 如果是Wall，直接替换为Tower，不需要重新计算路径
+        else if (tile.Content.Type == GameTileContentType.Wall)
+        {
+            tile.Content = m_contentFactory.Get(GameTileContentType.Tower);
+            m_updatingContent.Add(tile.Content);
         }
     }
 
@@ -377,11 +418,15 @@ public class GameBoard : MonoBehaviour
     /// </summary>
     private static readonly int MainTexID = Shader.PropertyToID("_MainTex");
 
-
     /// <summary>
     /// 存储游戏中的怪物生成点列表。
     /// </summary>
     private List<GameTile> m_spawnPoints = new List<GameTile>();
+
+    /// <summary>
+    ///  存储需要更新的GameTileContent
+    /// </summary>
+    private List<GameTileContent> m_updatingContent = new List<GameTileContent>();
 
     #endregion
 }

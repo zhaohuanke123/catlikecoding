@@ -45,6 +45,7 @@ public class GameTileContentFactory : GameObjectFactory
             case GameTileContentType.Empty: return Get(m_emptyPrefab);
             case GameTileContentType.Wall: return Get(m_wallPrefab);
             case GameTileContentType.SpawnPoint: return Get(m_spawnPointPrefab);
+            case GameTileContentType.Tower: return Get(m_towerPrefab);
         }
 
         Debug.Assert(false, "Unsupported type: " + type);
@@ -83,6 +84,12 @@ public class GameTileContentFactory : GameObjectFactory
     /// </summary>
     [SerializeField]
     private GameTileContent m_spawnPointPrefab = default;
+
+    /// <summary>
+    /// 预制体实例，代表游戏中可构建的Tower。
+    /// </summary>
+    [SerializeField]
+    private Tower m_towerPrefab = default;
 
     #endregion
 }

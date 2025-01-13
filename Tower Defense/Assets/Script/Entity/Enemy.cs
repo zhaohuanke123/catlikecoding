@@ -11,7 +11,14 @@ public class Enemy : MonoBehaviour
     /// <returns>返回布尔值，表示Enemy是否仍然有效。如果Enemy到达终点或被移除，则返回false。</returns>
     public bool GameUpdate()
     {
-        // 1. 更新移动进度
+        // 1. 检查Enemy是否已经死亡
+        if (Health <= 0f)
+        {
+            OriginFactory.Reclaim(this);
+            return false;
+        }
+
+        // 2. 更新移动进度
         m_progress += Time.deltaTime * m_progressFactor;
         while (m_progress >= 1f)
         {
@@ -26,12 +33,12 @@ public class Enemy : MonoBehaviour
             m_progress *= m_progressFactor;
         }
 
-        // 4. 更新Enemy位置
+        // 3. 更新Enemy位置
         if (m_directionChange == DirectionChange.None)
         {
             transform.localPosition = Vector3.LerpUnclamped(m_positionFrom, m_positionTo, m_progress);
         }
-        // 5. 更新Enemy旋转
+        // 4. 更新Enemy旋转
         else
         {
             float angle = Mathf.LerpUnclamped(m_directionAngleFrom, m_directionAngleTo, m_progress);
@@ -42,16 +49,18 @@ public class Enemy : MonoBehaviour
     }
 
     /// <summary>
-    /// 初始化Enemy对象的基本属性，模型缩放、移动速度和路径偏移量。
+    /// 初始化Enemy对象的基本属性
     /// </summary>
     /// <param name="scale">Enemy模型的缩放因子，决定模型在场景中的大小。</param>
     /// <param name="speed">Enemy移动的速度。</param>
     /// <param name="pathOffset">Enemy沿路径移动时的偏移距离。</param>
     public void Initialize(float scale, float speed, float pathOffset)
     {
+        Scale = scale;
         m_model.localScale = new Vector3(scale, scale, scale);
-        this.m_speed = speed;
-        this.m_pathOffset = pathOffset;
+        m_speed = speed;
+        m_pathOffset = pathOffset;
+        Health = 100f * scale;
     }
 
     /// <summary>
@@ -195,6 +204,17 @@ public class Enemy : MonoBehaviour
         m_progressFactor = 2f * m_speed;
     }
 
+    /// <summary>
+    /// 使Enemy对象承受伤害并减少其生命值。
+    /// </summary>
+    /// <param name="damage">施加给Enemy的伤害量，必须为非负数。</param>
+    public void ApplyDamage(float damage)
+    {
+        Debug.Assert(damage >= 0f, "Negative damage applied.");
+
+        Health -= damage;
+    }
+
     #endregion
 
     #region 属性
@@ -212,6 +232,16 @@ public class Enemy : MonoBehaviour
             m_originFactory = value;
         }
     }
+
+    /// <summary>
+    ///  Enemy模型的缩放因子，用于调整Enemy在场景中的大小。
+    /// </summary>
+    public float Scale { get; private set; }
+
+    /// <summary>
+    ///  Enemy的生命值。
+    /// </summary>
+    private float Health { get; set; }
 
     #endregion
 

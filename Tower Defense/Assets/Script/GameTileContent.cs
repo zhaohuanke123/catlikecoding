@@ -4,8 +4,30 @@
 /// 游戏格子内容基类，用于表示游戏地图上每个格子可变化的内容，如地面、障碍物或目标点等。
 /// 每个实例都与一个特定的 GameTileContentFactory 关联，以支持对象池和资源复用。
 /// </summary>
+[SelectionBase]
 public class GameTileContent : MonoBehaviour
 {
+    #region 方法
+
+    /// <summary>
+    /// 在每一帧游戏更新时被调用，用于执行与游戏逻辑相关的更新操作。
+    /// 子类可以重写此方法以实现具体的更新行为。
+    /// </summary>
+    public virtual void GameUpdate()
+    {
+    }
+
+    /// <summary>
+    /// 将当前 GameTileContent 实例返回给其关联的工厂以便复用或销毁。
+    /// 当不再需要某个格子内容时，应调用此方法以确保资源得到妥善管理。
+    /// </summary>
+    public void Recycle()
+    {
+        m_originFactory.Reclaim(this);
+    }
+
+    #endregion
+
     #region 属性
 
     /// <summary>
@@ -23,13 +45,9 @@ public class GameTileContent : MonoBehaviour
     }
 
     /// <summary>
-    /// 将当前 GameTileContent 实例返回给其关联的工厂以便复用或销毁。
-    /// 当不再需要某个格子内容时，应调用此方法以确保资源得到妥善管理。
+    ///  指示当前格子内容是否阻挡了路径。
     /// </summary>
-    public void Recycle()
-    {
-        m_originFactory.Reclaim(this);
-    }
+    public bool BlocksPath => Type == GameTileContentType.Wall || Type == GameTileContentType.Tower;
 
     #endregion
 

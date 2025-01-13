@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// 游戏核心控制类，负责管理游戏的整体运行流程，包括初始化、场景管理、游戏状态控制等。
+/// </summary>
 public class Game : MonoBehaviour
 {
     #region Unity 生命周期
@@ -36,7 +39,16 @@ public class Game : MonoBehaviour
             SpawnEnemy();
         }
 
+        // 5. 驱动enemy和棋盘的Update
         m_enemies.GameUpdate();
+
+        // 可以瞄准棋盘中心的塔能够获取本应超出射程的目标。它们无法跟踪这些目标，因此每个目标只会被锁定一个帧。
+        // 所有enemy都在世界原点实例化，这与棋盘的中心重合。然后我们将它们移动到它们的生成点，但物理引擎并没有立即意识到这一点。 
+        // 可以通过将 Physics.autoSyncTransforms 设置为 true 来强制在对象的变换发生变化时立即同步。
+        // 但默认情况下它是关闭的，因为仅在需要时一次性同步所有内容效率更高。
+        // 在我们的情况下，我们只需要在更新塔时进行同步。我们可以通过在 Game.Update 中更新enemy和棋盘之间调用 Physics.SyncTransforms 来实现这一点。
+        Physics.SyncTransforms();
+        m_board.GameUpdate();
     }
 
     /// <summary>
@@ -70,14 +82,22 @@ public class Game : MonoBehaviour
 
     /// <summary>
     /// 处理屏幕触碰(鼠标左键)事件，当玩家点击屏幕时调用此方法。
-    /// 根据触碰位置找到对应的 GameTile，并切换该方块上的状态为wall。
     /// </summary>
     private void HandleTouch()
     {
+        // 1. 获取触碰位置对应的格子
         GameTile tile = m_board.GetTile(TouchRay);
         if (tile != null)
         {
-            m_board.ToggleWall(tile);
+            // 2. 切换塔或者墙
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                m_board.ToggleTower(tile);
+            }
+            else
+            {
+                m_board.ToggleWall(tile);
+            }
         }
     }
 
