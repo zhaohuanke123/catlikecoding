@@ -510,8 +510,8 @@ MonoBehaviour:
   m_boardSize: {x: 11, y: 11}
   m_board: {fileID: 299201437}
   m_tileContentFactory: {fileID: 11400000, guid: fffd763ded578a745969536d268822ed, type: 2}
-  enemyFactory: {fileID: 11400000, guid: cb5cb1b4f1a67cf43ae6cec785fafa49, type: 2}
-  spawnSpeed: 1
+  m_enemyFactory: {fileID: 11400000, guid: cb5cb1b4f1a67cf43ae6cec785fafa49, type: 2}
+  m_spawnSpeed: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

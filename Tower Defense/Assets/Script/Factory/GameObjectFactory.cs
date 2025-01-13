@@ -42,16 +42,12 @@ public class GameObjectFactory : ScriptableObject
 
     #endregion
 
-    #region 事件
-
-    #endregion
-
-    #region 属性
-
-    #endregion
-
     #region 字段
 
+    /// <summary>
+    /// 当前工厂使用的场景，用于存储和管理游戏对象实例，以实现对象池的功能。
+    /// 该场景通常在首次调用时创建或加载，用于隔离和复用那些不直接展示在当前活跃场景中的游戏对象。
+    /// </summary>
     private Scene m_scene;
 
     #endregion

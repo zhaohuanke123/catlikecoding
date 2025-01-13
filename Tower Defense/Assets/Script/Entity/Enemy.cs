@@ -5,24 +5,6 @@ public class Enemy : MonoBehaviour
     #region 方法
 
     /// <summary>
-    /// 在指定的游戏方块上生成Enemy对象。
-    /// </summary>
-    /// <param name="tile">Enemy将要被初始化并开始移动的起始方块。</param>
-    public void SpawnOn(GameTile tile)
-    {
-        // transform.localPosition = tile.transform.localPosition;
-        Debug.Assert(tile.NextTileOnPath != null, "Nowhere to go!", this);
-
-        // 1. 获取下一个路径方块
-        m_tileFrom = tile;
-        m_tileTo = tile.NextTileOnPath;
-        m_progress = 0f;
-
-        // 2. 准备开始移动
-        PrepareIntro();
-    }
-
-    /// <summary>
     /// Enemy对象的游戏更新逻辑。
     /// 在每一帧调用以处理Enemy的移动和状态更新。
     /// </summary>
@@ -57,6 +39,37 @@ public class Enemy : MonoBehaviour
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// 初始化Enemy对象的基本属性，模型缩放、移动速度和路径偏移量。
+    /// </summary>
+    /// <param name="scale">Enemy模型的缩放因子，决定模型在场景中的大小。</param>
+    /// <param name="speed">Enemy移动的速度。</param>
+    /// <param name="pathOffset">Enemy沿路径移动时的偏移距离。</param>
+    public void Initialize(float scale, float speed, float pathOffset)
+    {
+        m_model.localScale = new Vector3(scale, scale, scale);
+        this.m_speed = speed;
+        this.m_pathOffset = pathOffset;
+    }
+
+    /// <summary>
+    /// 在指定的游戏方块上生成Enemy对象。
+    /// </summary>
+    /// <param name="tile">Enemy将要被初始化并开始移动的起始方块。</param>
+    public void SpawnOn(GameTile tile)
+    {
+        // transform.localPosition = tile.transform.localPosition;
+        Debug.Assert(tile.NextTileOnPath != null, "Nowhere to go!", this);
+
+        // 1. 获取下一个路径方块
+        m_tileFrom = tile;
+        m_tileTo = tile.NextTileOnPath;
+        m_progress = 0f;
+
+        // 2. 准备开始移动
+        PrepareIntro();
     }
 
     /// <summary>
@@ -105,12 +118,12 @@ public class Enemy : MonoBehaviour
     {
         transform.localRotation = m_direction.GetRotation();
         m_directionAngleTo = m_direction.GetAngle();
-        m_model.localPosition = new Vector3(m_pathOffset, 0);
+        m_model.localPosition = new Vector3(m_pathOffset, 0f);
         m_progressFactor = m_speed;
     }
 
     /// <summary>
-    /// 准备敌人向右转的状态。
+    /// 准备Enemy向右转的状态。
     /// </summary>
     private void PrepareTurnRight()
     {
@@ -133,18 +146,19 @@ public class Enemy : MonoBehaviour
     }
 
     /// <summary>
-    /// 准备敌人的转身动画状态，用于当方向改变需要完全掉头时调用。
+    /// 准备Enemy的转身动画状态，用于当方向改变需要完全掉头时调用。
     /// </summary>
     private void PrepareTurnAround()
     {
-        m_directionAngleTo = m_directionAngleFrom  + (m_pathOffset < 0f ? 180f : -180f);
+        m_directionAngleTo = m_directionAngleFrom + (m_pathOffset < 0f ? 180f : -180f);
         m_model.localPosition = new Vector3(m_pathOffset, 0f);
+        transform.localPosition = m_positionFrom;
         m_progressFactor = m_speed / (Mathf.PI * Mathf.Max(Mathf.Abs(m_pathOffset), 0.2f));
     }
 
     /// <summary>
-    /// 准备敌人的初始进场状态。
-    /// 在敌人被放置到游戏场景中的特定方块后调用，
+    /// 准备Enemy的初始进场状态。
+    /// 在Enemy被放置到游戏场景中的特定方块后调用，
     /// </summary>
     private void PrepareIntro()
     {
@@ -168,33 +182,17 @@ public class Enemy : MonoBehaviour
     }
 
     /// <summary>
-    /// 准备敌人的退出动画或逻辑。
-    /// 用于当敌人到达路径终点或遇到特定条件时调用，
+    /// 准备Enemy的退出动画或逻辑。
+    /// 用于当Enemy到达路径终点或遇到特定条件时调用，
     /// </summary>
     private void PrepareOutro()
     {
         m_positionTo = m_tileFrom.transform.localPosition;
-
         m_directionChange = DirectionChange.None;
         m_directionAngleTo = m_direction.GetAngle();
-
         m_model.localPosition = new Vector3(m_pathOffset, 0f);
         transform.localRotation = m_direction.GetRotation();
-
         m_progressFactor = 2f * m_speed;
-    }
-
-    /// <summary>
-    /// 初始化Enemy对象的基本属性，模型缩放、移动速度和路径偏移量。
-    /// </summary>
-    /// <param name="scale">Enemy模型的缩放因子，决定模型在场景中的大小。</param>
-    /// <param name="speed">Enemy移动的速度。</param>
-    /// <param name="pathOffset">Enemy沿路径移动时的偏移距离。</param>
-    public void Initialize(float scale, float speed, float pathOffset)
-    {
-        m_model.localScale = new Vector3(scale, scale, scale);
-        this.m_speed = speed;
-        this.m_pathOffset = pathOffset;
     }
 
     #endregion

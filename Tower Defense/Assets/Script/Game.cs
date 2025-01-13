@@ -102,6 +102,9 @@ public class Game : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 根据当前游戏状态和配置生成Enemy
+    /// </summary>
     private void SpawnEnemy()
     {
         GameTile spawnPoint = m_board.GetSpawnPoint(Random.Range(0, m_board.SpawnPointCount));
@@ -144,25 +147,25 @@ public class Game : MonoBehaviour
     private GameTileContentFactory m_tileContentFactory = default;
 
     /// <summary>
-    /// 
+    /// Enemy实例工厂引用，用于创建和管理Enemy对象。
     /// </summary>
     [SerializeField]
     private EnemyFactory m_enemyFactory = default;
 
     /// <summary>
-    /// 
+    /// Enemy生成速度，决定每秒钟尝试生成Enemy的频率。该值越大，Enemy生成得越快。
     /// </summary>
     [SerializeField]
     [Range(0.1f, 10f)]
     private float m_spawnSpeed = 1f;
 
     /// <summary>
-    /// 
+    /// 生成进度，表示当前Enemy生成的积累进度值。此值随时间增加，每达到1.0时即触发一次Enemy的生成。
     /// </summary>
     private float m_spawnProgress;
 
     /// <summary>
-    /// 
+    /// 存储并管理游戏中所有Enemy的集合。
     /// </summary>
     private EnemyCollection m_enemies = new EnemyCollection();
 

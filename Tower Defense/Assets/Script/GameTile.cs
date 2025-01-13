@@ -52,7 +52,7 @@ public class GameTile : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// 将当前GameTile标记为目标目的地，并清除其路径信息。
     /// </summary>
     public void BecomeDestination()
     {
@@ -67,6 +67,7 @@ public class GameTile : MonoBehaviour
     /// 如果目标相邻方块为空或者已有路径，则返回null。否则，更新目标方块的路径信息并返回该方块。
     /// </summary>
     /// <param name="neighbor">尝试延伸路径到达的相邻GameTile对象。</param>
+    /// <param name="direction">需要获取地图块的方向</param>
     /// <returns>成功延伸路径后的相邻GameTile，如果无法延伸则返回null。</returns>
     private GameTile GrowPathTo(GameTile neighbor, Direction direction)
     {
