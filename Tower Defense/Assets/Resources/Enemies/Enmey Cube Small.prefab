@@ -129,7 +129,7 @@ GameObject:
   - component: {fileID: 2291651607450574927}
   - component: {fileID: 2001984879670142215}
   m_Layer: 9
-  m_Name: Enmey
+  m_Name: Enmey Cube Small
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

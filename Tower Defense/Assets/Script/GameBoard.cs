@@ -64,10 +64,22 @@ public class GameBoard : MonoBehaviour
             }
         }
 
-        // 3. 设置终点
-        ToggleDestination(m_tiles[m_tiles.Length / 2]);
+        Clear();
+    }
 
-        // 4. 设置怪物生成点
+    /// <summary>
+    /// 清除棋盘状态，重置所有游戏方块的内容为默认空类型，并且重置生成点、更新中的内容以及终点和起点状态。
+    /// </summary>
+    public void Clear()
+    {
+        foreach (GameTile tile in m_tiles)
+        {
+            tile.Content = m_contentFactory.Get(GameTileContentType.Empty);
+        }
+
+        m_spawnPoints.Clear();
+        m_updatingContent.Clear();
+        ToggleDestination(m_tiles[m_tiles.Length / 2]);
         ToggleSpawnPoint(m_tiles[0]);
     }
 
@@ -225,10 +237,10 @@ public class GameBoard : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// 切换游戏方块上的塔类型或在空方块上放置塔。
     /// </summary>
-    /// <param name="tile">要进行Tower状态切换的游戏方块实例。</param>
-    /// <param name="towerType"></param>
+    /// <param name="tile">要进行Tower状态切换或放置的游戏方块实例。</param>
+    /// <param name="towerType">要切换到的塔类型，取值为Laser或Mortar。</param>
     public void ToggleTower(GameTile tile, TowerType towerType)
     {
         // 1. 切换Tower 状态
@@ -271,9 +283,9 @@ public class GameBoard : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// 切换游戏方块为生成点。
     /// </summary>
-    /// <param name="tile"></param>
+    /// <param name="tile">要切换状态的游戏方块。</param>
     public void ToggleSpawnPoint(GameTile tile)
     {
         if (tile.Content.Type == GameTileContentType.SpawnPoint)
@@ -293,6 +305,11 @@ public class GameBoard : MonoBehaviour
 
     #endregion
 
+    /// <summary>
+    /// 获取指定索引的怪物生成点。
+    /// </summary>
+    /// <param name="index">要获取的生成点在列表中的索引位置。</param>
+    /// <returns>位于指定索引的怪物生成点。</returns>
     public GameTile GetSpawnPoint(int index)
     {
         return m_spawnPoints[index];

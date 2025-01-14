@@ -3,7 +3,7 @@
 /// <summary>
 ///  游戏行为基类
 /// </summary>
-public class GameBehavior : MonoBehaviour
+public abstract class GameBehavior : MonoBehaviour
 {
     #region 方法
 
@@ -13,6 +13,11 @@ public class GameBehavior : MonoBehaviour
     /// </summary>
     /// <returns>如果对象仍有效并应继续参与游戏循环，则返回true；否则返回false。</returns>
     public virtual bool GameUpdate() => true;
+
+    /// <summary>
+    ///  提供游戏内实体对象的回收逻辑。
+    /// </summary>
+    public abstract void Recycle();
 
     #endregion
 }

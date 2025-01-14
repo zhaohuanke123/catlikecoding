@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 57a0784bdc6e4a62a5ce34c7b1b8a6dd, type: 3}
-  m_Name: Enemy Factory
+  m_Name: Enemy Sphere Factory
   m_EditorClassIdentifier: 
   m_small:
-    m_prefab: {fileID: 2001984879670142215, guid: ee6fe035afecaaf4aadca8300d4d8606, type: 3}
+    m_prefab: {fileID: 7012074777765284301, guid: 2bf7f5644e17e4501a5a0de8586b2f74, type: 3}
     m_scale:
       m_min: 0.5
       m_max: 0.6
@@ -27,7 +27,7 @@ MonoBehaviour:
       m_min: 40
       m_max: 50
   m_medium:
-    m_prefab: {fileID: 2001984879670142215, guid: c0ee8c9ea3e628940bc8ff6994326691, type: 3}
+    m_prefab: {fileID: 7012074777765284301, guid: 16329050fd4864868945a491cebf61c8, type: 3}
     m_scale:
       m_min: 0.9
       m_max: 1
@@ -41,7 +41,7 @@ MonoBehaviour:
       m_min: 90
       m_max: 120
   m_large:
-    m_prefab: {fileID: 2001984879670142215, guid: 708e4db4ac1657f4a8b1b68c7196dc49, type: 3}
+    m_prefab: {fileID: 7012074777765284301, guid: c76e4bbbf775a4562b53760f407d466b, type: 3}
     m_scale:
       m_min: 1.2
       m_max: 1.4

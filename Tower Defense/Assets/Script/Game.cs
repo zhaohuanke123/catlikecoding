@@ -32,6 +32,7 @@ public class Game : MonoBehaviour
             m_board.ShowGrid = !m_board.ShowGrid;
         }
 
+        // 5. 按键切换显示生成Tower的类型
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             m_selectedTowerType = TowerType.Laser;
@@ -41,14 +42,37 @@ public class Game : MonoBehaviour
             m_selectedTowerType = TowerType.Mortar;
         }
 
-        m_spawnProgress += m_spawnSpeed * Time.deltaTime;
-        while (m_spawnProgress >= 1f)
+        // 6. 按键切换暂停
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            m_spawnProgress -= 1f;
-            SpawnEnemy();
+            Time.timeScale = Time.timeScale > PausedTimeScale ? PausedTimeScale : m_playSpeed;
+        }
+        else if (Time.timeScale > PausedTimeScale)
+        {
+            Time.timeScale = m_playSpeed;
         }
 
-        // 5. 驱动enemy和棋盘的Update, 以及非敌人实体的Update
+        // 7. 开始新游戏
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            BeginNewGame();
+        }
+
+        // 8. 处理游戏胜利和失败
+        if (m_playerHealth <= 0 && m_startingPlayerHealth > 0)
+        {
+            Debug.Log("Defeat!");
+            BeginNewGame();
+        }
+
+        if (!m_activeScenario.Progress() && m_enemies.IsEmpty)
+        {
+            Debug.Log("victory");
+            BeginNewGame();
+            m_activeScenario.Progress();
+        }
+
+        // 9. 驱动enemy和棋盘的Update, 以及非敌人实体的Update
         m_enemies.GameUpdate();
 
         // 可以瞄准棋盘中心的塔能够获取本应超出射程的目标。它们无法跟踪这些目标，因此每个目标只会被锁定一个帧。
@@ -87,14 +111,28 @@ public class Game : MonoBehaviour
 
     private void Awake()
     {
-        // 1. 初始化棋盘
+        // 1. 初始化游戏
+        m_playerHealth = m_startingPlayerHealth;
         m_board.Initialize(m_boardSize, m_tileContentFactory);
         m_board.ShowGrid = true;
+        m_activeScenario = m_scenario.Begin();
     }
 
     #endregion
 
     #region 方法
+
+    /// <summary>
+    ///  清除所有，然后开始一个新场景。
+    /// </summary>
+    private void BeginNewGame()
+    {
+        m_playerHealth = m_startingPlayerHealth;
+        m_enemies.Clear();
+        m_nonEnemies.Clear();
+        m_board.Clear();
+        m_activeScenario = m_scenario.Begin();
+    }
 
     /// <summary>
     /// 处理屏幕触碰(鼠标左键)事件，当玩家点击屏幕时调用此方法。
@@ -141,13 +179,12 @@ public class Game : MonoBehaviour
     /// <summary>
     /// 根据当前游戏状态和配置生成Enemy
     /// </summary>
-    private void SpawnEnemy()
+    public static void SpawnEnemy(EnemyFactory factory, EnemyType type)
     {
-        GameTile spawnPoint = m_board.GetSpawnPoint(Random.Range(0, m_board.SpawnPointCount));
-        Enemy enemy = m_enemyFactory.Get();
+        GameTile spawnPoint = s_instance.m_board.GetSpawnPoint(Random.Range(0, s_instance.m_board.SpawnPointCount));
+        Enemy enemy = factory.Get(type);
         enemy.SpawnOn(spawnPoint);
-
-        m_enemies.Add(enemy);
+        s_instance.m_enemies.Add(enemy);
     }
 
     /// <summary>
@@ -171,6 +208,14 @@ public class Game : MonoBehaviour
         Explosion explosion = s_instance.m_warFactory.Explosion;
         s_instance.m_nonEnemies.Add(explosion);
         return explosion;
+    }
+
+    /// <summary>
+    /// 敌人到达终点, 玩家生命值减1
+    /// </summary>
+    public static void EnemyReachedDestination()
+    {
+        s_instance.m_playerHealth -= 1;
     }
 
     #endregion
@@ -206,24 +251,6 @@ public class Game : MonoBehaviour
     private GameTileContentFactory m_tileContentFactory = default;
 
     /// <summary>
-    /// Enemy实例工厂引用，用于创建和管理Enemy对象。
-    /// </summary>
-    [SerializeField]
-    private EnemyFactory m_enemyFactory = default;
-
-    /// <summary>
-    /// Enemy生成速度，决定每秒钟尝试生成Enemy的频率。该值越大，Enemy生成得越快。
-    /// </summary>
-    [SerializeField]
-    [Range(0.1f, 10f)]
-    private float m_spawnSpeed = 1f;
-
-    /// <summary>
-    /// 生成进度，表示当前Enemy生成的积累进度值。此值随时间增加，每达到1.0时即触发一次Enemy的生成。
-    /// </summary>
-    private float m_spawnProgress;
-
-    /// <summary>
     /// 存储并管理游戏中所有Enemy的集合。
     /// </summary>
     private GameBehaviorCollection m_enemies = new GameBehaviorCollection();
@@ -248,6 +275,41 @@ public class Game : MonoBehaviour
     ///  全局唯一的Game实例。
     /// </summary>
     private static Game s_instance;
+
+    /// <summary>
+    /// 当前游戏场景的配置实例
+    /// </summary>
+    [SerializeField]
+    private GameScenario m_scenario = default;
+
+    /// <summary>
+    ///  当前游戏场景的状态 
+    /// </summary>
+    private GameScenario.State m_activeScenario;
+
+    /// <summary>
+    ///  玩家初始生命值
+    /// </summary>
+    [SerializeField]
+    [Range(0, 100)]
+    private int m_startingPlayerHealth = 10;
+
+    /// <summary>
+    ///  玩家当前生命值
+    /// </summary>
+    private int m_playerHealth;
+
+    /// <summary>
+    /// 控制游戏暂停的时间缩放值。
+    /// </summary>
+    private const float PausedTimeScale = 0f;
+
+    /// <summary>
+    /// 游戏播放速度
+    /// </summary>
+    [SerializeField]
+    [Range(1f, 10f)]
+    private float m_playSpeed = 1f;
 
     #endregion
 }

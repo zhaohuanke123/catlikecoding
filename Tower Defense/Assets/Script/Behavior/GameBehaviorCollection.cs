@@ -32,6 +32,30 @@ public class GameBehaviorCollection
         m_behaviors.Add(behavior);
     }
 
+    /// <summary>
+    ///  清空集合中的所有行为。
+    /// 开始新的游戏时，会调用此方法清空所有行为。
+    /// </summary>
+    public void Clear()
+    {
+        for (int i = 0; i < m_behaviors.Count; i++)
+        {
+            m_behaviors[i].Recycle();
+        }
+
+        m_behaviors.Clear();
+    }
+
+    #endregion
+
+    #region 属性
+
+    /// <summary>
+    ///  行为集合是否为空。
+    /// </summary>
+    /// <value>如果集合为空，则返回true；否则返回false。</value>
+    public bool IsEmpty => m_behaviors.Count == 0;
+
     #endregion
 
     #region 字段

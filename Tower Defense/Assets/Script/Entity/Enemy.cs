@@ -7,17 +7,12 @@ public class Enemy : GameBehavior
 {
     #region 方法
 
-    /// <summary>
-    /// Enemy对象的游戏更新逻辑。
-    /// 在每一帧调用以处理Enemy的移动和状态更新。
-    /// </summary>
-    /// <returns>返回布尔值，表示Enemy是否仍然有效。如果Enemy到达终点或被移除，则返回false。</returns>
     public override bool GameUpdate()
     {
         // 1. 检查Enemy是否已经死亡
         if (Health <= 0f)
         {
-            OriginFactory.Reclaim(this);
+            Recycle();
             return false;
         }
 
@@ -27,7 +22,8 @@ public class Enemy : GameBehavior
         {
             if (m_tileTo == null)
             {
-                OriginFactory.Reclaim(this);
+                Game.EnemyReachedDestination();
+                Recycle();
                 return false;
             }
 
@@ -51,19 +47,25 @@ public class Enemy : GameBehavior
         return true;
     }
 
+    public override void Recycle()
+    {
+        m_originFactory.Reclaim(this);
+    }
+
     /// <summary>
     /// 初始化Enemy对象的基本属性
     /// </summary>
     /// <param name="scale">Enemy模型的缩放因子，决定模型在场景中的大小。</param>
     /// <param name="speed">Enemy移动的速度。</param>
     /// <param name="pathOffset">Enemy沿路径移动时的偏移距离。</param>
-    public void Initialize(float scale, float speed, float pathOffset)
+    /// <param name="health">Enemy的生命值</param>
+    public void Initialize(float scale, float speed, float pathOffset, float health)
     {
         Scale = scale;
         m_model.localScale = new Vector3(scale, scale, scale);
         m_speed = speed;
         m_pathOffset = pathOffset;
-        Health = 100f * scale;
+        Health = health;
     }
 
     /// <summary>

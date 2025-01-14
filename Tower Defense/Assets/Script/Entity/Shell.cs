@@ -18,11 +18,11 @@ public class Shell : WarEntity
     public void Initialize(Vector3 launchPoint, Vector3 targetPoint, Vector3 launchVelocity, float blastRadius,
         float damage)
     {
-        this.m_launchPoint = launchPoint;
-        this.m_targetPoint = targetPoint;
-        this.m_launchVelocity = launchVelocity;
-        this.m_blastRadius = blastRadius;
-        this.m_damage = damage;
+        m_launchPoint = launchPoint;
+        m_targetPoint = targetPoint;
+        m_launchVelocity = launchVelocity;
+        m_blastRadius = blastRadius;
+        m_damage = damage;
     }
 
     public override bool GameUpdate()

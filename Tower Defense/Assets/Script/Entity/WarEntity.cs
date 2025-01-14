@@ -10,7 +10,7 @@ public class WarEntity : GameBehavior
     /// <summary>
     ///  回收War实体
     /// </summary>
-    public void Recycle()
+    public override void Recycle()
     {
         m_originFactory.Reclaim(this);
     }
