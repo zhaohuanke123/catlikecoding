@@ -30,18 +30,9 @@ public abstract class Tower : GameTileContent
     /// </returns>
     protected bool AcquireTarget(out TargetPoint target)
     {
-        Vector3 a = transform.localPosition;
-        Vector3 b = a;
-        b.y += 3f;
-        // 1. overlap 检测周围的enemy
-        int hits = Physics.OverlapCapsuleNonAlloc(a, b, m_targetingRange, s_targetsBuffer, EnemyLayerMask);
-        if (hits > 0)
+        if (TargetPoint.FillBuffer(transform.localPosition, m_targetingRange))
         {
-            int randomIndex = Random.Range(0, hits);
-            // 2. 锁定第一个enemy
-            target = s_targetsBuffer[randomIndex].GetComponent<TargetPoint>();
-            Debug.Assert(target != null, "Targeted non-enemy!", s_targetsBuffer[0]);
-
+            target = TargetPoint.RandomBuffered;
             return true;
         }
 
@@ -84,19 +75,12 @@ public abstract class Tower : GameTileContent
 
     #region 字段
 
-    private const int EnemyLayerMask = 1 << 9;
-
     /// <summary>
     /// 攻击范围半径，决定塔楼可攻击的区域大小。
     /// </summary>
     [SerializeField]
     [Range(1.5f, 10.5f)]
     protected float m_targetingRange = 1.5f;
-
-    /// <summary>
-    ///  用于缓存 Physics.OverlapCapsule 的结果。
-    /// </summary>
-    private static Collider[] s_targetsBuffer = new Collider[100];
 
     /// <summary>
     ///  当前tower的 类型

@@ -48,7 +48,7 @@ public class Game : MonoBehaviour
             SpawnEnemy();
         }
 
-        // 5. 驱动enemy和棋盘的Update
+        // 5. 驱动enemy和棋盘的Update, 以及非敌人实体的Update
         m_enemies.GameUpdate();
 
         // 可以瞄准棋盘中心的塔能够获取本应超出射程的目标。它们无法跟踪这些目标，因此每个目标只会被锁定一个帧。
@@ -57,7 +57,14 @@ public class Game : MonoBehaviour
         // 但默认情况下它是关闭的，因为仅在需要时一次性同步所有内容效率更高。
         // 在我们的情况下，我们只需要在更新塔时进行同步。我们可以通过在 Game.Update 中更新enemy和棋盘之间调用 Physics.SyncTransforms 来实现这一点。
         Physics.SyncTransforms();
+
         m_board.GameUpdate();
+        m_nonEnemies.GameUpdate();
+    }
+
+    private void OnEnable()
+    {
+        s_instance = this;
     }
 
     /// <summary>
@@ -143,6 +150,29 @@ public class Game : MonoBehaviour
         m_enemies.Add(enemy);
     }
 
+    /// <summary>
+    /// 创建并初始化一个新的炮弹实体
+    /// </summary>
+    /// <returns>新创建的炮弹实体。</returns>
+    public static Shell SpawnShell()
+    {
+        Shell shell = s_instance.m_warFactory.Shell;
+        s_instance.m_nonEnemies.Add(shell);
+        return shell;
+    }
+
+    /// <summary>
+    /// 创建并初始化一个爆炸效果实例
+    /// 此方法用于模拟炮弹爆炸、产生视觉特效及处理相关逻辑。
+    /// </summary>
+    /// <returns>新创建的爆炸实例。</returns>
+    public static Explosion SpawnExplosion()
+    {
+        Explosion explosion = s_instance.m_warFactory.Explosion;
+        s_instance.m_nonEnemies.Add(explosion);
+        return explosion;
+    }
+
     #endregion
 
     #region 属性
@@ -196,9 +226,28 @@ public class Game : MonoBehaviour
     /// <summary>
     /// 存储并管理游戏中所有Enemy的集合。
     /// </summary>
-    private EnemyCollection m_enemies = new EnemyCollection();
+    private GameBehaviorCollection m_enemies = new GameBehaviorCollection();
 
+    /// <summary>
+    ///  非敌人的GameBehavior集合，子弹等
+    /// </summary>
+    private GameBehaviorCollection m_nonEnemies = new GameBehaviorCollection();
+
+    /// <summary>
+    ///  当前选择的Tower类型。
+    /// </summary>
     private TowerType m_selectedTowerType;
+
+    /// <summary>
+    /// 塔防游戏entity工厂实例，用于生成和回收游戏中的实体对象。
+    /// </summary>
+    [SerializeField]
+    private WarFactory m_warFactory = default;
+
+    /// <summary>
+    ///  全局唯一的Game实例。
+    /// </summary>
+    private static Game s_instance;
 
     #endregion
 }

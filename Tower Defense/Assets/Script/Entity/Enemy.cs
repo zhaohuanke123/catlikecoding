@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 
-public class Enemy : MonoBehaviour
+/// <summary>
+///  Enemy类，塔防游戏中的敌人实体类。 
+/// </summary>
+public class Enemy : GameBehavior
 {
     #region 方法
 
@@ -9,7 +12,7 @@ public class Enemy : MonoBehaviour
     /// 在每一帧调用以处理Enemy的移动和状态更新。
     /// </summary>
     /// <returns>返回布尔值，表示Enemy是否仍然有效。如果Enemy到达终点或被移除，则返回false。</returns>
-    public bool GameUpdate()
+    public override bool GameUpdate()
     {
         // 1. 检查Enemy是否已经死亡
         if (Health <= 0f)

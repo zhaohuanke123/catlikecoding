@@ -512,6 +512,7 @@ MonoBehaviour:
   m_tileContentFactory: {fileID: 11400000, guid: fffd763ded578a745969536d268822ed, type: 2}
   m_enemyFactory: {fileID: 11400000, guid: cb5cb1b4f1a67cf43ae6cec785fafa49, type: 2}
   m_spawnSpeed: 1
+  m_warFactory: {fileID: 11400000, guid: c4a48584deb175e4fb5db7f5095f66e7, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
