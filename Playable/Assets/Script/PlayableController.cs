@@ -13,12 +13,13 @@ public class PlayableController : MonoBehaviour
 
     private void Update()
     {
-        for (int i = 0; i < m_animData.m_clipDatas.Length; i++)
+        if (Input.GetKeyDown(KeyCode.A))
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
-            {
-                m_playerAnimator.Play(m_animData.m_clipDatas[i]);
-            }
+            m_playerAnimator.Play(m_animData[0]);
+        }
+        else if (Input.GetKeyDown(KeyCode.B))
+        {
+            m_playerAnimator.Play(m_animData[1]);
         }
 
         m_playerAnimator.GameUpdate();
@@ -28,18 +29,6 @@ public class PlayableController : MonoBehaviour
     {
         m_playerAnimator.Destroy();
     }
-
-    #endregion
-
-    #region 方法
-
-    #endregion
-
-    #region 事件
-
-    #endregion
-
-    #region 属性
 
     #endregion
 
