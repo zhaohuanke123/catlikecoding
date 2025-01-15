@@ -18,6 +18,7 @@ public class EnemyCollection
                 m_enemies[i] = m_enemies[lastIndex];
                 m_enemies.RemoveAt(lastIndex);
                 i -= 1;
+                Game.OnEnemyCountChanged(Count);
             }
         }
     }
@@ -29,7 +30,38 @@ public class EnemyCollection
     public void Add(Enemy enemy)
     {
         m_enemies.Add(enemy);
+        Game.OnEnemyCountChanged(Count);
     }
+
+    /// <summary>
+    /// 清空集合中的所有Enemy。
+    /// </summary>
+    public void Clear()
+    {
+        for (int i = 0; i < m_enemies.Count; i++)
+        {
+            m_enemies[i].Recycle();
+        }
+
+        Game.OnEnemyCountChanged(Count);
+        m_enemies.Clear();
+    }
+
+    #endregion
+
+
+    #region 属性
+
+    /// <summary>
+    ///  行为集合是否为空。
+    /// </summary>
+    /// <value>如果集合为空，则返回true；否则返回false。</value>
+    public bool IsEmpty => m_enemies.Count == 0;
+
+    /// <summary>
+    ///  行为集合中的数量。 
+    /// </summary>
+    public int Count => m_enemies.Count;
 
     #endregion
 

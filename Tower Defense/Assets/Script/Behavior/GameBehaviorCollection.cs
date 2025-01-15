@@ -1,5 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
+/// <summary>
+///  行为组件集合，统一管理
+/// </summary>
+[Serializable]
 public class GameBehaviorCollection
 {
     #region 方法
@@ -48,15 +53,6 @@ public class GameBehaviorCollection
 
     #endregion
 
-    #region 属性
-
-    /// <summary>
-    ///  行为集合是否为空。
-    /// </summary>
-    /// <value>如果集合为空，则返回true；否则返回false。</value>
-    public bool IsEmpty => m_behaviors.Count == 0;
-
-    #endregion
 
     #region 字段
 

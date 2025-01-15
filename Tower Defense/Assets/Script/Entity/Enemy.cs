@@ -1,30 +1,75 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 ///  Enemy类，塔防游戏中的敌人实体类。 
 /// </summary>
 public class Enemy : GameBehavior
 {
+    private void Awake()
+    {
+        m_animator.Configure(m_model.GetChild(0).gameObject.AddComponent<Animator>(), m_animationConfig);
+    }
+
+    private void OnDestroy()
+    {
+        m_animator.Destroy();
+    }
+
     #region 方法
 
     public override bool GameUpdate()
     {
-        // 1. 检查Enemy是否已经死亡
-        if (Health <= 0f)
+#if UNITY_EDITOR
+        if (!m_animator.IsValid)
         {
-            Recycle();
-            return false;
+            m_animator.RestoreAfterHotReload(m_model.GetChild(0).GetComponent<Animator>(), m_animationConfig,
+                m_animationConfig.MoveAnimationSpeed * m_speed / Scale);
+        }
+#endif
+   
+        m_animator.GameUpdate();
+        // 1. 动画相关检查
+        if (m_animator.CurrentClip == EnemyAnimator.Clip.Intro)
+        {
+            if (!m_animator.IsDone)
+            {
+                return true;
+            }
+
+            m_animator.PlayMove(m_animationConfig.MoveAnimationSpeed * m_speed / Scale);
+            m_targetPointCollider.enabled = true;
+        }
+        // 退出或死亡动画
+        else if (m_animator.CurrentClip >= EnemyAnimator.Clip.Outro)
+        {
+            if (m_animator.IsDone)
+            {
+                Recycle();
+                return false;
+            }
+
+            return true;
         }
 
-        // 2. 更新移动进度
+        // 2. 检查Enemy是否已经死亡
+        if (Health <= 0f)
+        {
+            m_animator.PlayDying();
+            m_targetPointCollider.enabled = false;
+            return true;
+        }
+
+        // 3. 更新移动进度
         m_progress += Time.deltaTime * m_progressFactor;
         while (m_progress >= 1f)
         {
             if (m_tileTo == null)
             {
                 Game.EnemyReachedDestination();
-                Recycle();
-                return false;
+                m_animator.PlayOutro();
+                m_targetPointCollider.enabled = false;
+                return true;
             }
 
             m_progress = (m_progress - 1f) / m_progressFactor;
@@ -32,12 +77,12 @@ public class Enemy : GameBehavior
             m_progress *= m_progressFactor;
         }
 
-        // 3. 更新Enemy位置
+        // 4. 更新Enemy位置
         if (m_directionChange == DirectionChange.None)
         {
             transform.localPosition = Vector3.LerpUnclamped(m_positionFrom, m_positionTo, m_progress);
         }
-        // 4. 更新Enemy旋转
+        // 5. 更新Enemy旋转
         else
         {
             float angle = Mathf.LerpUnclamped(m_directionAngleFrom, m_directionAngleTo, m_progress);
@@ -49,6 +94,7 @@ public class Enemy : GameBehavior
 
     public override void Recycle()
     {
+        m_animator.Stop();
         m_originFactory.Reclaim(this);
     }
 
@@ -66,6 +112,9 @@ public class Enemy : GameBehavior
         m_speed = speed;
         m_pathOffset = pathOffset;
         Health = health;
+
+        m_animator.PlayIntro();
+        m_targetPointCollider.enabled = false;
     }
 
     /// <summary>
@@ -178,6 +227,7 @@ public class Enemy : GameBehavior
     {
         // 1. 设置初始位置和目标位置
         m_positionFrom = m_tileFrom.transform.localPosition;
+        transform.localPosition = m_positionFrom;
         m_positionTo = m_tileFrom.ExitPoint;
 
         // 2. 设置初始方向和目标方向
@@ -247,6 +297,26 @@ public class Enemy : GameBehavior
     ///  Enemy的生命值。
     /// </summary>
     private float Health { get; set; }
+
+    /// <summary>
+    /// 敌人目标点碰撞器设置属性。
+    /// 允许外部设置敌人用于检测目标点碰撞的Collider组件，
+    /// </summary>
+    /// <value>待设置的目标点碰撞器。</value>
+    public Collider TargetPointCollider
+    {
+        set
+        {
+            Debug.Assert(m_targetPointCollider == null, "Redefined collider!");
+
+            m_targetPointCollider = value;
+        }
+    }
+
+    /// <summary>
+    /// 表示当前敌人是否为有效的攻击目标。
+    /// </summary>
+    public bool IsValidTarget => m_animator.CurrentClip == EnemyAnimator.Clip.Move;
 
     #endregion
 
@@ -324,6 +394,23 @@ public class Enemy : GameBehavior
     /// Enemy移动速度。
     /// </summary>
     private float m_speed;
+
+    /// <summary>
+    /// Enemy的动画配置 
+    /// </summary>
+    [SerializeField]
+    private EnemyAnimationConfig m_animationConfig = default;
+
+    /// <summary>
+    /// Enemy的动画控制器
+    /// </summary>
+    private EnemyAnimator m_animator;
+
+    /// <summary>
+    /// 敌人目标点碰撞器引用。
+    /// 用于检测敌人到达特定目标点的碰撞事件，比如完成路径上的一个阶段或触发某些逻辑。
+    /// </summary>
+    private Collider m_targetPointCollider;
 
     #endregion
 }

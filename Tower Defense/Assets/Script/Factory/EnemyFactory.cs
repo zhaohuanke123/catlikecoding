@@ -8,7 +8,7 @@
 [CreateAssetMenu]
 public class EnemyFactory : GameObjectFactory
 {
-    #region 嵌套类
+    #region 嵌套类型
 
     /// <summary>
     /// 敌人配置类，用于存储单个类型敌人的预制体及其属性范围。

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9f74cae56a545d4b81d8272bd0575d3, type: 3}
+  m_Name: Enemy Cube Animation Config
+  m_EditorClassIdentifier: 
+  m_move: {fileID: 7400000, guid: d8279b3ab8c39544fb381afb531a8bac, type: 2}
+  m_intro: {fileID: 7400000, guid: 2913d65c8b93538419adb4d164e150c7, type: 2}
+  m_outro: {fileID: 7400000, guid: 704e75bc7bc13c647ae9bfe21ee25917, type: 2}
+  m_dying: {fileID: 7400000, guid: 4a929b71527f2ce4d9c04c61d1219237, type: 2}
+  m_moveAnimationSpeed: 1
+  m_appear: {fileID: 0}
+  m_disappear: {fileID: 0}

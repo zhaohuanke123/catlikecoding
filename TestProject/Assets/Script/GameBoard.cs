@@ -1,25 +1,29 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 // 游戏棋盘，用于可视化 
 public class GameBoard : MonoBehaviour
 {
-    #region Unity 生命周期
-
-    #endregion
-
     #region 方法
+
+    public void GameUpdate()
+    {
+        for (int i = 0; i < m_updatingContent.Count; i++)
+        {
+            m_updatingContent[i].GameUpdate();
+        }
+    }
 
     /// <summary>
     /// 初始化游戏棋盘，根据给定的尺寸创建并布局游戏方块。
     /// </summary>
     /// <param name="size">棋盘的尺寸，一个包含宽度（x轴）和高度（y轴）的二维整数向量。</param>
+    /// <param name="contentFactory"> 游戏方块内容工厂，用于创建和管理不同类型的GameTileContent对象。 </param>
     public void Initialize(Vector2Int size, GameTileContentFactory contentFactory)
     {
         // 1. 保存棋盘尺寸 设置地面的缩放
         m_size = size;
-        this.m_contentFactory = contentFactory;
+        m_contentFactory = contentFactory;
         m_ground.localScale = new Vector3(size.x, size.y, 1f);
 
         // 2. 计算距离中心点的偏移量
@@ -62,6 +66,9 @@ public class GameBoard : MonoBehaviour
 
         // 3. 设置终点
         ToggleDestination(m_tiles[m_tiles.Length / 2]);
+
+        // 4. 设置怪物生成点
+        ToggleSpawnPoint(m_tiles[0]);
     }
 
     /// <summary>
@@ -147,7 +154,7 @@ public class GameBoard : MonoBehaviour
     public GameTile GetTile(Ray ray)
     {
         //  1. 射线检测
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        if (Physics.Raycast(ray, out RaycastHit hit, float.MaxValue, 1))
         {
             // 2. 计算射线命中的方块索引
             int x = (int)(hit.point.x + m_size.x * 0.5f);
@@ -217,7 +224,79 @@ public class GameBoard : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="tile">要进行Tower状态切换的游戏方块实例。</param>
+    /// <param name="towerType"></param>
+    public void ToggleTower(GameTile tile, TowerType towerType)
+    {
+        // 1. 切换Tower 状态
+        if (tile.Content.Type == GameTileContentType.Tower)
+        {
+            m_updatingContent.Remove(tile.Content);
+            if (((Tower)tile.Content).TowerType == towerType)
+            {
+                tile.Content = m_contentFactory.Get(GameTileContentType.Empty);
+                FindPaths();
+            }
+            else
+            {
+                tile.Content = m_contentFactory.Get(towerType);
+                m_updatingContent.Add(tile.Content);
+            }
+        }
+        else if (tile.Content.Type == GameTileContentType.Empty)
+        {
+            // 2. 如果是Empty，设置为Tower
+            tile.Content = m_contentFactory.Get(towerType);
+
+            // 3. 确保有一条路径
+            if (FindPaths())
+            {
+                m_updatingContent.Add(tile.Content);
+            }
+            else
+            {
+                tile.Content = m_contentFactory.Get(GameTileContentType.Empty);
+                FindPaths();
+            }
+        }
+        // 4. 如果是Wall，直接替换为Tower，不需要重新计算路径
+        else if (tile.Content.Type == GameTileContentType.Wall)
+        {
+            tile.Content = m_contentFactory.Get(towerType);
+            m_updatingContent.Add(tile.Content);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="tile"></param>
+    public void ToggleSpawnPoint(GameTile tile)
+    {
+        if (tile.Content.Type == GameTileContentType.SpawnPoint)
+        {
+            if (m_spawnPoints.Count > 1)
+            {
+                m_spawnPoints.Remove(tile);
+                tile.Content = m_contentFactory.Get(GameTileContentType.Empty);
+            }
+        }
+        else if (tile.Content.Type == GameTileContentType.Empty)
+        {
+            tile.Content = m_contentFactory.Get(GameTileContentType.SpawnPoint);
+            m_spawnPoints.Add(tile);
+        }
+    }
+
     #endregion
+
+    public GameTile GetSpawnPoint(int index)
+    {
+        return m_spawnPoints[index];
+    }
 
     #region 属性
 
@@ -277,6 +356,11 @@ public class GameBoard : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// 怪物生成点的数量。
+    /// </summary>
+    public int SpawnPointCount => m_spawnPoints.Count;
 
     #endregion
 
@@ -342,6 +426,16 @@ public class GameBoard : MonoBehaviour
     /// 主纹理的Shader属性ID。用于在运行时通过脚本访问材质的主纹理属性。
     /// </summary>
     private static readonly int MainTexID = Shader.PropertyToID("_MainTex");
+
+    /// <summary>
+    /// 存储游戏中的怪物生成点列表。
+    /// </summary>
+    private List<GameTile> m_spawnPoints = new List<GameTile>();
+
+    /// <summary>
+    ///  存储需要更新的GameTileContent
+    /// </summary>
+    private List<GameTileContent> m_updatingContent = new List<GameTileContent>();
 
     #endregion
 }

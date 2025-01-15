@@ -21,6 +21,8 @@ public class GameScenario : ScriptableObject
             m_index = 0;
             m_cycle = 0;
             m_timeScale = 1f;
+            Game.OnCycleChanged(m_cycle, scenario.m_waves.Length);
+            Game.OnWaveChanged(m_index, scenario.m_cycles);
 
             Debug.Assert(scenario.m_waves.Length > 0, "Empty scenario!");
 
@@ -53,10 +55,12 @@ public class GameScenario : ScriptableObject
                         return false;
                     }
 
+                    Game.OnCycleChanged(m_cycle, m_scenario.m_cycles);
                     m_index = 0;
                     m_timeScale += m_scenario.m_cycleSpeedUp;
                 }
 
+                Game.OnWaveChanged(m_index, m_scenario.m_waves.Length);
                 m_wave = m_scenario.m_waves[m_index].Begin();
                 deltaTime = m_wave.Progress(deltaTime);
             }

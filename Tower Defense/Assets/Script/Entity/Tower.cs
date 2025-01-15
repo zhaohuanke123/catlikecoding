@@ -49,7 +49,7 @@ public abstract class Tower : GameTileContent
     protected bool TrackTarget(ref TargetPoint target)
     {
         // 1. 检查目标是否有效
-        if (target == null)
+        if (target == null || !target.Enemy.IsValidTarget)
         {
             return false;
         }

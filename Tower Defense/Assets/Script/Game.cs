@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.Events;
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// 游戏核心控制类，负责管理游戏的整体运行流程，包括初始化、场景管理、游戏状态控制等。
@@ -9,6 +12,11 @@ public class Game : MonoBehaviour
 
     private void Update()
     {
+        if (!m_isGamePlaying)
+        {
+            return;
+        }
+
         // 1. 处理玩家左键
         if (Input.GetMouseButtonDown(0))
         {
@@ -61,15 +69,12 @@ public class Game : MonoBehaviour
         // 8. 处理游戏胜利和失败
         if (m_playerHealth <= 0 && m_startingPlayerHealth > 0)
         {
-            Debug.Log("Defeat!");
-            BeginNewGame();
+            OnGameEnd(false);
         }
 
         if (!m_activeScenario.Progress() && m_enemies.IsEmpty)
         {
-            Debug.Log("victory");
-            BeginNewGame();
-            m_activeScenario.Progress();
+            OnGameEnd(true);
         }
 
         // 9. 驱动enemy和棋盘的Update, 以及非敌人实体的Update
@@ -115,12 +120,18 @@ public class Game : MonoBehaviour
         m_playerHealth = m_startingPlayerHealth;
         m_board.Initialize(m_boardSize, m_tileContentFactory);
         m_board.ShowGrid = true;
-        m_activeScenario = m_scenario.Begin();
+        // m_activeScenario = m_scenario.Begin();
     }
 
     #endregion
 
     #region 方法
+
+    public static void StartGame()
+    {
+        s_instance.m_isGamePlaying = true;
+        s_instance.BeginNewGame();
+    }
 
     /// <summary>
     ///  清除所有，然后开始一个新场景。
@@ -128,6 +139,7 @@ public class Game : MonoBehaviour
     private void BeginNewGame()
     {
         m_playerHealth = m_startingPlayerHealth;
+        OnPlayerHealthChanged(m_playerHealth);
         m_enemies.Clear();
         m_nonEnemies.Clear();
         m_board.Clear();
@@ -216,7 +228,90 @@ public class Game : MonoBehaviour
     public static void EnemyReachedDestination()
     {
         s_instance.m_playerHealth -= 1;
+        OnPlayerHealthChanged(s_instance.m_playerHealth);
     }
+
+    /// <summary>
+    /// 敌人数量变化时触发的事件处理方法。
+    /// 此方法用于通知所有订阅者敌人数量的变更情况，通常在添加或移除敌人时被调用。
+    /// </summary>
+    /// <param name="count">当前敌人的数量。</param>
+    public static void OnEnemyCountChanged(int count)
+    {
+        s_instance.EventOnEnemyCountChanged?.Invoke(count);
+    }
+
+    /// <summary>
+    /// 游戏周期变化时触发的事件处理方法。
+    /// 此方法用于通知所有订阅者当前游戏周期的变化，通常在一个完整的游戏循环结束时被调用。
+    /// </summary>
+    /// <param name="cycle">当前游戏周期的序号。</param>
+    /// <param name="allCycle">总的循环</param>
+    public static void OnCycleChanged(int cycle, int allCycle)
+    {
+        s_instance.EventOnCycleChanged?.Invoke(cycle, allCycle);
+    }
+
+    /// <summary>
+    /// 波次变化时触发的事件处理方法。
+    /// 此方法用于通知所有订阅者当前波次的变化，通常在新的一波敌人开始时被调用。
+    /// </summary>
+    /// <param name="wave">当前波次的编号。</param>
+    /// <param name="allWave">总波次</param>
+    public static void OnWaveChanged(int wave, int allWave)
+    {
+        s_instance.EventOnWaveChanged?.Invoke(wave, allWave);
+    }
+
+    /// <summary>
+    /// 玩家生命值变化时触发的事件处理方法。
+    /// 此方法用于通知所有订阅者玩家生命值得变更情况，通常在敌人到达终点或其它影响玩家生命值得操作后被调用。
+    /// </summary>
+    /// <param name="health">当前玩家的剩余生命值。</param>
+    public static void OnPlayerHealthChanged(int health)
+    {
+        s_instance.EventOnPlayerHealthChanged?.Invoke(health, s_instance.m_startingPlayerHealth);
+    }
+
+    /// <summary>
+    /// 游戏结束事件处理方法。
+    /// 根据游戏结果（胜利或失败）触发相应的逻辑，例如显示游戏结果界面、统计得分、重置游戏状态等。
+    /// </summary>
+    /// <param name="isWin">是否为胜利。true 表示胜利，false 表示失败。</param>
+    public static void OnGameEnd(bool isWin)
+    {
+        s_instance.m_isGamePlaying = false;
+        s_instance.EventOnGameEnd?.Invoke(isWin);
+    }
+
+    #endregion
+
+    #region 事件
+
+    /// <summary>
+    /// 敌人数量变化事件。当游戏中的敌人数量发生变化时，此事件会被触发，并传递当前的敌人数量作为参数。
+    /// </summary>
+    public event UnityAction<int> EventOnEnemyCountChanged;
+
+    /// <summary>
+    /// 游戏周期改变事件，当游戏进行到新的一轮时触发。
+    /// </summary>
+    public event UnityAction<int, int> EventOnCycleChanged;
+
+    /// <summary>
+    /// 游戏波次变化事件，当游戏中敌人的波次发生变化时触发。
+    /// </summary>
+    public event UnityAction<int, int> EventOnWaveChanged;
+
+    /// <summary>
+    /// 玩家生命值变化事件。当玩家的生命值发生变化时，此事件被触发。
+    /// </summary>
+    public event UnityAction<int, int> EventOnPlayerHealthChanged;
+
+    /// <summary>
+    /// 游戏结束事件。当游戏结束时，此事件被触发。
+    /// </summary>
+    public event UnityAction<bool> EventOnGameEnd;
 
     #endregion
 
@@ -227,6 +322,22 @@ public class Game : MonoBehaviour
     /// 并进一步与游戏中的棋盘方块交互。此属性通过将屏幕坐标转换为世界坐标系下的射线实现。
     /// </summary>
     private Ray TouchRay => Camera.main.ScreenPointToRay(Input.mousePosition);
+
+    /// <summary>
+    /// 获取全局唯一的Game实例。
+    /// </summary>
+    public static Game Instance
+    {
+        get
+        {
+            if (s_instance == null)
+            {
+                s_instance = FindObjectOfType<Game>();
+            }
+
+            return s_instance;
+        }
+    }
 
     #endregion
 
@@ -253,7 +364,7 @@ public class Game : MonoBehaviour
     /// <summary>
     /// 存储并管理游戏中所有Enemy的集合。
     /// </summary>
-    private GameBehaviorCollection m_enemies = new GameBehaviorCollection();
+    private EnemyCollection m_enemies = new EnemyCollection();
 
     /// <summary>
     ///  非敌人的GameBehavior集合，子弹等
@@ -310,6 +421,11 @@ public class Game : MonoBehaviour
     [SerializeField]
     [Range(1f, 10f)]
     private float m_playSpeed = 1f;
+
+    /// <summary>
+    /// 游戏是否正在进行中
+    /// </summary>
+    private bool m_isGamePlaying;
 
     #endregion
 }
