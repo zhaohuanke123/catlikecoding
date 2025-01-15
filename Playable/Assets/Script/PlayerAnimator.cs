@@ -44,7 +44,7 @@ public struct PlayerAnimator
         m_graph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
         m_mixer = AnimationMixerPlayable.Create(m_graph);
 
-        var output = AnimationPlayableOutput.Create(m_graph, "Player", animator);
+        var output = AnimationPlayableOutput.Create(m_graph, "Player" + Random.Range(0, 10), animator);
         output.SetSourcePlayable(m_mixer);
         m_graph.Play();
 
@@ -52,6 +52,8 @@ public struct PlayerAnimator
         m_previousClipPort = -1;
         m_currentClipPort = -1;
         m_transitionProgress = -1;
+
+        output.SetWeight(0.5f);
     }
 
     /// <summary>
