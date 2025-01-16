@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<engine:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:engine="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd">
+    <Style
+        src="project://database/Assets/Editor/Calculator.uss?fileID=7433441132597879392&amp;guid=b5ba717473c1977419868cd5a9cf6de4&amp;type=3#Computer" />
+    <!-- <engine:Label text="Hello World! From UXML" /> -->
+    <!-- <engine:Label class="custom-label" text="Hello World! With Style" /> -->
+    <engine:VisualElement class="computer">
+        <engine:Label text="0" class="output" />
+        <engine:VisualElement class="row">
+            <engine:Button text="7" class="button" />
+            <engine:Button text="8" class="button" />
+            <engine:Button text="9" class="button" />
+            <engine:Button text="/" class="button" />
+        </engine:VisualElement>
+        <engine:VisualElement class="row">
+            <engine:Button text="4" class="button" />
+            <engine:Button text="5" class="button" />
+            <engine:Button text="6" class="button" />
+            <engine:Button text="*" class="button" />
+        </engine:VisualElement>
+        <engine:VisualElement class="row">
+            <engine:Button text="1" class="button" />
+            <engine:Button text="2" class="button" />
+            <engine:Button text="3" class="button" />
+            <engine:Button text="-" class="button" />
+        </engine:VisualElement>
+        <engine:VisualElement class="row">
+            <engine:Button text="C" class="button" />
+            <engine:Button text="0" class="button" />
+            <engine:Button text="=" class="button" />
+            <engine:Button text="+" class="button" />
+        </engine:VisualElement>
+    </engine:VisualElement>
+
+</engine:UXML>

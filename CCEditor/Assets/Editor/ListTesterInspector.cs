@@ -1,5 +1,8 @@
 ﻿using UnityEditor;
 
+/// <summary>
+/// ListTester 自定义Inspector 面板绘制。
+/// </summary>
 [CustomEditor(typeof(ListTester))]
 [CanEditMultipleObjects]
 public class ListTesterInspector : Editor

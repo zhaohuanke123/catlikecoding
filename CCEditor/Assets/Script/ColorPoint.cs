@@ -2,6 +2,9 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
+/// <summary>
+/// 测试
+/// </summary>
 [Serializable]
 public class ColorPoint
 {

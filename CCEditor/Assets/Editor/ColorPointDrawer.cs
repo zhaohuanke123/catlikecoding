@@ -1,6 +1,9 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
+/// <summary>
+/// ColorPoint 自定义属性绘制。
+/// </summary>
 [CustomPropertyDrawer(typeof(ColorPoint))]
 public class ColorPointDrawer : PropertyDrawer
 {

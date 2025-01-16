@@ -2,6 +2,9 @@
 using UnityEngine;
 using System;
 
+/// <summary>
+/// 绘制列表时的可选项
+/// </summary>
 [Flags]
 public enum EditorListOption
 {

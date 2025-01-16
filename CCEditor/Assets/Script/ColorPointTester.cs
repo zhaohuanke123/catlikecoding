@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.Serialization;
 
+/// <summary>
+/// 测试
+/// </summary>
 public class ColorPointTester : MonoBehaviour
 {
     #region 字段

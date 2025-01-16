@@ -15,6 +15,13 @@ public enum EditorListOption {
 }
 
 public static class EditorList {
+
+	private static GUIContent
+		moveButtonContent = new GUIContent("\u21b4", "move down"),
+		duplicateButtonContent = new GUIContent("+", "duplicate"),
+		deleteButtonContent = new GUIContent("-", "delete"),
+		addButtonContent = new GUIContent("+", "add element");
+
 	private static GUILayoutOption miniButtonWidth = GUILayout.Width(20f);
 
 	public static void Show (SerializedProperty list, EditorListOption options = EditorListOption.Default) {
@@ -88,11 +95,4 @@ public static class EditorList {
 			}
 		}
 	}
-
-	private static GUIContent
-		moveButtonContent = new GUIContent("\u21b4", "move down"),
-		duplicateButtonContent = new GUIContent("+", "duplicate"),
-		deleteButtonContent = new GUIContent("-", "delete"),
-		addButtonContent = new GUIContent("+", "add element");
-
 }
