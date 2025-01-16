@@ -7,10 +7,8 @@
     xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd">
     <Style
         src="project://database/Assets/Editor/Calculator.uss?fileID=7433441132597879392&amp;guid=b5ba717473c1977419868cd5a9cf6de4&amp;type=3#Computer" />
-    <!-- <engine:Label text="Hello World! From UXML" /> -->
-    <!-- <engine:Label class="custom-label" text="Hello World! With Style" /> -->
-    <engine:VisualElement class="computer">
-        <engine:Label text="0" class="output" />
+    <engine:VisualElement class="container" name="container">
+        <engine:Label text="0" class="output" name="output" />
         <engine:VisualElement class="row">
             <engine:Button text="7" class="button" />
             <engine:Button text="8" class="button" />

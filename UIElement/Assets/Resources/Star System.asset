@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c64f0ee5acb24a9ab32404f5cd1493d0, type: 3}
+  m_Name: Star System
+  m_EditorClassIdentifier: 
+  m_sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_planets:
+  - {fileID: 3629243135260294036}
+  m_scale: 1
+--- !u!114 &3629243135260294036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6546d04ba6c4436bd1fb71147a810dd, type: 3}
+  m_Name: New Planet
+  m_EditorClassIdentifier: 
+  m_sprite: {fileID: 0}
+  m_scale: 0
+  m_speed: 0
+  m_distance: 0
